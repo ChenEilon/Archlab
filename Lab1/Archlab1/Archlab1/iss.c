@@ -14,9 +14,9 @@
 #define SRC1_SHIFT		16
 #define REG_NUM			8
 #define TRC_INST_SIZE	200
-#define INPUT_BIN_FILE		"C:\\Users\\DELL1\\Desktop\\Lab1\\lab1_example\\example.bin"
-#define OUTPUT_MEM_FILE		"C:\\Users\\DELL1\\Desktop\\Lab1\\lab1_example\\tmp2.txt"
-#define OUTPUT_TRACE_FILE	"C:\\Users\\DELL1\\Desktop\\Lab1\\lab1_example\\tmp3.txt"
+#define INPUT_BIN_FILE		"asm.bin"
+#define OUTPUT_MEM_FILE		"sram_out.txt"
+#define OUTPUT_TRACE_FILE	"trace.txt"
 
 typedef int32_t INT32;
 typedef uint32_t DWORD;
