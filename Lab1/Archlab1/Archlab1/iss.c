@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <errno.h>
 
 #define MEM_LEN			65536
 #define OPCODE_MASK		0X1f
@@ -14,7 +15,6 @@
 #define SRC1_SHIFT		16
 #define REG_NUM			8
 #define TRC_INST_SIZE	200
-#define INPUT_BIN_FILE		"asm.bin"
 #define OUTPUT_MEM_FILE		"sram_out.txt"
 #define OUTPUT_TRACE_FILE	"trace.txt"
 
@@ -86,8 +86,8 @@ static INT32 instructionNumber;
 /************************ Monitor functions *********************/
 /****************************************************************/
 
-void printError(int err) {
-	printf("Error: %d", err);
+void printError() {
+	printf("Error: %s\n", strerror(errno));
 }
 
 static void parseInst(DWORD inst) {
@@ -121,16 +121,15 @@ static void performJump(INT32 newPc) {
 }
 
 static int traceInstruction(bool validInstruction){
-	int err;
 	FILE *fp;
 
 	if (instructionNumber == 1) {
-		err = fopen_s(&fp, OUTPUT_TRACE_FILE, "w");
+		fp = fopen(OUTPUT_TRACE_FILE, "w");
 	} else {
-		err = fopen_s(&fp, OUTPUT_TRACE_FILE, "a");
+		fp = fopen(OUTPUT_TRACE_FILE, "a");
 	}
-	if (err != 0) {
-		printError(err);
+	if (fp == NULL) {
+		printError();
 		return -1;
 	}
 
@@ -172,11 +171,7 @@ r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x\nr[4] = %08x r[5] = %08x r[6] = 
 			currentInst.inst);
 	}
 
-	err = fclose(fp);
-	if (err != 0) {
-		printError(err);
-		return -1;
-	}
+	fclose(fp);
 
 	return 0;
 }
@@ -276,13 +271,12 @@ static bool excuteCurrentInstruction() {
 }
 
 int loadMemory(DWORD *buffer, size_t bufferLen, char *filePath) {
-	int err;
 	size_t i;
 	FILE *fp;
 
-	err = fopen_s(&fp, filePath, "r");
-	if (err != 0) {
-		printError(err);
+	fp = fopen(filePath, "r");
+	if (fp == NULL) {
+		printError();
 		return -1;
 	}
 
@@ -291,26 +285,22 @@ int loadMemory(DWORD *buffer, size_t bufferLen, char *filePath) {
 	}
 
 	i = 0;
-	while (fscanf_s(fp, "%x", buffer + i++) != EOF && i < bufferLen) {
+	while (i < bufferLen) {
+		fscanf(fp, "%x", buffer + i++);
 	}
 
-	err = fclose(fp);
-	if (err != 0) {
-		printError(err);
-		return -1;
-	}
+	fclose(fp);
 
 	return 0;
 }
 
 int dumpMemory(DWORD *buffer, size_t bufferLen, char *filePath) {
-	int err;
 	size_t i;
 	FILE *fp;
 
-	err = fopen_s(&fp, filePath, "w");
-	if (err != 0) {
-		printError(err);
+	fp = fopen(filePath, "w");
+	if (fp == NULL) {
+		printError();
 		return -1;
 	}
 
@@ -318,11 +308,7 @@ int dumpMemory(DWORD *buffer, size_t bufferLen, char *filePath) {
 		fprintf(fp, "%08x\n", buffer[i]);
 	}
 
-	err = fclose(fp);
-	if (err != 0) {
-		printError(err);
-		return -1;
-	}
+	fclose(fp);
 
 	return 0;
 }
@@ -331,44 +317,51 @@ int dumpMemory(DWORD *buffer, size_t bufferLen, char *filePath) {
 /**************************** Tests *****************************/
 /****************************************************************/
 
-static bool testParseInst() {
-	DWORD a = 0x0088000f;
-	parseInst(a);
-	if ((Opcode)currentInst.opcode != ADD || currentInst.dst != 2 || currentInst.src0 != 1 || currentInst.src1 != 0 || currentInst.imm != 15)
-		return false;
-	a = 0x241c000b;
-	parseInst(a);
-	if ((Opcode)currentInst.opcode != JEQ || currentInst.dst != 0 || currentInst.src0 != 3 || currentInst.src1 != 4 || currentInst.imm != 11)
-		return false;
-	a = 0x11420000;
-	parseInst(a);
-	if ((Opcode)currentInst.opcode != LD || currentInst.dst != 5 || currentInst.src0 != 0 || currentInst.src1 != 2 || currentInst.imm != 0)
-		return false;
-	a = 0x30000000;
-	parseInst(a);
-	if ((Opcode)currentInst.opcode != HLT || currentInst.dst != 0 || currentInst.src0 != 0 || currentInst.src1 != 0 || currentInst.imm != 0)
-		return false;
-	return true;
-}
+//static bool testParseInst() {
+//	DWORD a = 0x0088000f;
+//	parseInst(a);
+//	if ((Opcode)currentInst.opcode != ADD || currentInst.dst != 2 || currentInst.src0 != 1 || currentInst.src1 != 0 || currentInst.imm != 15)
+//		return false;
+//	a = 0x241c000b;
+//	parseInst(a);
+//	if ((Opcode)currentInst.opcode != JEQ || currentInst.dst != 0 || currentInst.src0 != 3 || currentInst.src1 != 4 || currentInst.imm != 11)
+//		return false;
+//	a = 0x11420000;
+//	parseInst(a);
+//	if ((Opcode)currentInst.opcode != LD || currentInst.dst != 5 || currentInst.src0 != 0 || currentInst.src1 != 2 || currentInst.imm != 0)
+//		return false;
+//	a = 0x30000000;
+//	parseInst(a);
+//	if ((Opcode)currentInst.opcode != HLT || currentInst.dst != 0 || currentInst.src0 != 0 || currentInst.src1 != 0 || currentInst.imm != 0)
+//		return false;
+//	return true;
+//}
 
 /****************************************************************/
 /**************************** Main flow *************************/
 /****************************************************************/
 
-int main() {
+int main(int argc, char *argv[]) {
+	if (argc < 2) {
+		printf("Usage: %s <input_file>", argv[0]);
+		return 0;
+	}
+
 	/* init */
 	cleanup();
-	int x = loadMemory(mem, MEM_LEN, INPUT_BIN_FILE);
+	loadMemory(mem, MEM_LEN, argv[1]);
 	DWORD inst;
 	bool keepRunning = true;
+
 	/* execute program*/
-	while (keepRunning)
-	{
+	while (keepRunning) {
 		inst = mem[pc]; //Get next instruction
 		parseInst(inst);
 		keepRunning = excuteCurrentInstruction();
 	}
+
 	// finish 
 	dumpMemory(mem, MEM_LEN, OUTPUT_MEM_FILE);
+
 	return 0;
 }
