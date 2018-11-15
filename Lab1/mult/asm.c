@@ -53,8 +53,8 @@ static void assemble_program(char *program_name)
 	 */
 	asm_cmd(LD, 2, 1, 0, 1000);  // 0: R2 = MEM[1000]
 	asm_cmd(LD, 3, 1, 0, 1001);  // 1: R3 = MEM[1001]
-      	asm_cmd(JEQ, 0, 2, 0, 22);   // 2: PC = 22 if (R2 == 0)
-        asm_cmd(JEQ, 0, 3, 0, 22);   // 3: PC = 22 if (R3 == 0)
+      	asm_cmd(JEQ, 0, 2, 0, 23);   // 2: PC = 23 if (R2 == 0)
+        asm_cmd(JEQ, 0, 3, 0, 23);   // 3: PC = 23 if (R3 == 0)
 	asm_cmd(XOR, 5, 2, 3, 0);    // 4: R5 = XOR(R2,R3)
 	asm_cmd(JLT, 0, 0, 3, 7);    // 5: PC = 7 (R3 > 0)
         asm_cmd(SUB, 3, 0, 3, 0);    // 6: R3 = 0-R3
