@@ -5,16 +5,18 @@
 #include <string.h>
 #include <errno.h>
 
-#define MEM_LEN			65536
-#define OPCODE_MASK		0X1f
-#define IMM_SHIFT		16
-#define REG_MASK		0x7
-#define OPCODE_SHIFT	25
-#define DST_SHIFT		22
-#define SRC0_SHIFT		19
-#define SRC1_SHIFT		16
-#define REG_NUM			8
-#define TRC_INST_SIZE	200
+#define MEM_LEN				65536
+#define OPCODE_MASK			0X1f
+#define IMM_SHIFT			16
+#define REG_MASK			0x7
+#define OPCODE_SHIFT		25
+#define DST_SHIFT			22
+#define SRC0_SHIFT			19
+#define SRC1_SHIFT			16
+#define REG_NUM				8
+#define TRC_INST_SIZE		200
+#define MAX_LEN_PATH		100
+#define MAX_LEN_EXEC_TRC	100
 #define OUTPUT_MEM_FILE		"sram_out.txt"
 #define OUTPUT_TRACE_FILE	"trace.txt"
 
@@ -81,6 +83,8 @@ static INT32 registerBlk[REG_NUM];
 static INT32 pc;
 static DWORD mem[MEM_LEN];
 static INT32 instructionNumber;
+static char inputName[MAX_LEN_PATH];
+static int inputMemoryLineCount;
 
 /****************************************************************/
 /************************ Monitor functions *********************/
@@ -117,14 +121,67 @@ static INT32 getNum(int reg) {
 static void performJump(INT32 newPc) {
 	registerBlk[7] = pc;
 	pc = newPc;
-	//TODO - add R7 to stack and update R6?
+}
+
+static int traceExecLine(int num0, int num1)
+{
+	FILE *fp;
+	 //prepare line
+	char execStr[MAX_LEN_EXEC_TRC];
+	memset(execStr, 0, MAX_LEN_EXEC_TRC);
+	if (currentInst.opcode <= 7)
+	{
+		sprintf(execStr, ">>>> EXEC: R[%d] = %d %s %d <<<<\n\n",
+			currentInst.dst,
+			num0,
+			opcodeStrings[currentInst.opcode],
+			num1);
+	}
+	else if (currentInst.opcode == LD)
+	{
+		sprintf(execStr, ">>>> EXEC: R[%d] = MEM[%d] = %08x <<<<\n\n",
+			currentInst.dst,
+			num1,
+			mem[num1]);
+	}
+	else if (currentInst.opcode == ST)
+	{
+		sprintf(execStr, ">>>> EXEC: MEM[%d] = R[%d] = %08x <<<<\n\n",
+			num1,
+			currentInst.src0,
+			registerBlk[currentInst.src0]);
+	}
+	else if (currentInst.opcode >= 16 && currentInst.opcode <= 20)
+	{
+		sprintf(execStr, ">>>> EXEC: %s %d, %d, %d <<<<\n\n",
+			opcodeStrings[currentInst.opcode],
+			num0,
+			num1,
+			pc);
+	}
+	else //HALT . valid check was before
+	{
+		sprintf(execStr, ">>>> EXEC: HALT at PC %04x<<<<\nsim finished at pc %d, %d instructions", pc,pc,instructionNumber);
+	}
+
+	//write to file
+
+	fp = fopen(OUTPUT_TRACE_FILE, "a");
+	if (fp == NULL) {
+		printError();
+		return -1;
+	}
+	fprintf(fp, "%s", execStr);
+	fclose(fp);
+	return 0;
 }
 
 static int traceInstruction(bool validInstruction){
 	FILE *fp;
-
-	if (instructionNumber == 1) {
+	
+	if (instructionNumber == 0) {
 		fp = fopen(OUTPUT_TRACE_FILE, "w");
+		fprintf(fp, "program %s loaded, %d lines\n\n", inputName, inputMemoryLineCount);
 	} else {
 		fp = fopen(OUTPUT_TRACE_FILE, "a");
 	}
@@ -136,9 +193,9 @@ static int traceInstruction(bool validInstruction){
 	if (validInstruction) {
 		fprintf(
 			fp,
-			"--- instruction %d (%04d) @ PC %d (%04d) -----------------------------------------------------------\n\
+			"--- instruction %d (%04x) @ PC %d (%04x) -----------------------------------------------------------\n\
 pc = %04d, inst = %08x, opcode = %d (%s), dst = %d, src0 = %d, src1 = %d, immediate = %08x\n\
-r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x\nr[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x\n\n",
+r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x \nr[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
 			instructionNumber,
 			instructionNumber,
 			pc,
@@ -147,7 +204,8 @@ r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x\nr[4] = %08x r[5] = %08x r[6] = 
 			currentInst.inst,
 			currentInst.opcode,
 			opcodeStrings[currentInst.opcode],
-			currentInst.dst, currentInst.src0,
+			currentInst.dst,
+			currentInst.src0,
 			currentInst.src1,
 			currentInst.imm,
 			registerBlk[0],
@@ -162,7 +220,7 @@ r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x\nr[4] = %08x r[5] = %08x r[6] = 
 		fprintf(
 			fp,
 			"--- instruction %d (%04d) @ PC %d (%04d) -------------------------------------\
-		----------------------\npc = %04d, inst = %08x\n INVALID INSTRUCTION!",
+----------------------\npc = %04d, inst = %08x\n INVALID INSTRUCTION!",
 			instructionNumber,
 			instructionNumber,
 			pc,
@@ -182,13 +240,20 @@ static bool excuteCurrentInstruction() {
 	bool error = (currentInst.dst > (REG_NUM - 1) || currentInst.src0 > (REG_NUM - 1) || currentInst.src1 > (REG_NUM - 1)) || (currentInst.dst <= 1 && currentInst.opcode <= 7);
 	if (error) {  /*checks if register numbers are valid and if arithmetic command has illegal dst*/
 		validInstruction = false;
-		instructionNumber++;
 		traceInstruction(validInstruction);
+		instructionNumber++;
 		return keepGoing;
 	}
 	
+	registerBlk[1] = currentInst.imm;
 	INT32 num0 = getNum(currentInst.src0);
 	INT32 num1 = getNum(currentInst.src1);
+
+	if (currentInst.opcode > 24 || (currentInst.opcode > 9 && currentInst.opcode < 16) || (currentInst.opcode > 20 && currentInst.opcode < 24)) {
+	    validInstruction = false;
+	}
+
+	traceInstruction(validInstruction);
 
 	switch (currentInst.opcode) {
 		case ADD:
@@ -261,12 +326,13 @@ static bool excuteCurrentInstruction() {
 		case HLT:
 			keepGoing = false;
 			break;
-		default:
+			/*default:
 			validInstruction = false;
-			break;
+			break;*/
 	}
-	instructionNumber++; 
-	traceInstruction(validInstruction);
+
+	instructionNumber++;
+	traceExecLine(num0, num1);
 	return keepGoing;
 }
 
@@ -285,8 +351,13 @@ int loadMemory(DWORD *buffer, size_t bufferLen, char *filePath) {
 	}
 
 	i = 0;
+	inputMemoryLineCount = 0;
 	while (i < bufferLen) {
-		fscanf(fp, "%x", buffer + i++);
+		fscanf(fp, "%x", buffer + i);
+		if (buffer[i] != 0x00000000) {
+		  inputMemoryLineCount = i+1;
+		}
+		i++;
 	}
 
 	fclose(fp);
@@ -349,7 +420,8 @@ int main(int argc, char *argv[]) {
 
 	/* init */
 	cleanup();
-	loadMemory(mem, MEM_LEN, argv[1]);
+	strcpy(inputName, argv[1]);
+	loadMemory(mem, MEM_LEN, inputName);
 	DWORD inst;
 	bool keepRunning = true;
 
@@ -362,6 +434,5 @@ int main(int argc, char *argv[]) {
 
 	// finish 
 	dumpMemory(mem, MEM_LEN, OUTPUT_MEM_FILE);
-
 	return 0;
 }
