@@ -53,20 +53,22 @@ static void assemble_program(char *program_name)
 	 */
 	asm_cmd(ADD, 2, 1, 0, 1);    // 0: R2 = 1
 	asm_cmd(ADD, 3, 1, 0, 1);    // 1: R3 = 1
-	asm_cmd(ADD, 4, 1, 0, 1000); // 2: R4 = 1000
-	asm_cmd(ADD, 5, 1, 0, 0);    // 3: R5 = 0
-	asm_cmd(ADD, 6, 1, 0, 100);  // 4: R6 = 100
-	asm_cmd(JEQ, 0, 5, 6, 13);   // 5: PC = 13 if R5 == R6
-	asm_cmd(ADD, 7, 2, 3, 0);    // 6: R7 = R2 + R3
-	asm_cmd(ADD, 2, 3, 0, 0);    // 7: R2 = R3
-	asm_cmd(ADD, 3, 7, 0, 0);    // 8: R3 = R7
-	asm_cmd(ST,  0, 7, 4, 0);    // 9: MEM[R4] = R7
-	asm_cmd(ADD, 4, 4, 1, 1);    // 10: R4 = R4 + 1
-	asm_cmd(ADD, 5, 5, 1, 1);    // 11: R5 = R5 + 1
-	asm_cmd(JEQ, 0, 0, 0, 5);    // 12: PC = 5
-	asm_cmd(HLT, 0, 0, 0, 0);    // 13: HALT
+	asm_cmd(ST, 0, 2, 1, 1000);  // 2: MEM[1000] = R2
+	asm_cmd(ST, 0, 3, 1, 1001);  // 3: MEM[1001] = R3
+	asm_cmd(ADD, 4, 1, 0, 1002); // 4: R4 = 1002
+	asm_cmd(ADD, 5, 1, 0, 0);    // 5: R5 = 0
+	asm_cmd(ADD, 6, 1, 0, 98);   // 6: R6 = 98
+	asm_cmd(JEQ, 0, 5, 6, 15);   // 7: PC = 15 if R5 == R6
+	asm_cmd(ADD, 7, 2, 3, 0);    // 8: R7 = R2 + R3
+	asm_cmd(ADD, 2, 3, 0, 0);    // 9: R2 = R3
+	asm_cmd(ADD, 3, 7, 0, 0);    // 10: R3 = R7
+	asm_cmd(ST,  0, 7, 4, 0);    // 11: MEM[R4] = R7
+	asm_cmd(ADD, 4, 4, 1, 1);    // 12: R4 = R4 + 1
+	asm_cmd(ADD, 5, 5, 1, 1);    // 13: R5 = R5 + 1
+	asm_cmd(JEQ, 0, 0, 0, 7);    // 14: PC = 7
+	asm_cmd(HLT, 0, 0, 0, 0);    // 15: HALT
 
-	last_addr = 14;
+	last_addr = 16;
 
 	fp = fopen(program_name, "w");
 	if (fp == NULL) {

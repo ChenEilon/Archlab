@@ -123,49 +123,47 @@ static void performJump(INT32 newPc) {
 	pc = newPc;
 }
 
-static int traceExecLine(int num0, int num1)
-{
+static int traceExecLine(int num0, int num1) {
 	FILE *fp;
-	 //prepare line
+
+	//prepare line
 	char execStr[MAX_LEN_EXEC_TRC];
 	memset(execStr, 0, MAX_LEN_EXEC_TRC);
-	if (currentInst.opcode <= 7)
-	{
-		sprintf(execStr, ">>>> EXEC: R[%d] = %d %s %d <<<<\n\n",
+	if (currentInst.opcode <= 7) {
+		sprintf(
+			execStr,
+			">>>> EXEC: R[%d] = %d %s %d <<<<\n\n",
 			currentInst.dst,
 			num0,
 			opcodeStrings[currentInst.opcode],
 			num1);
-	}
-	else if (currentInst.opcode == LD)
-	{
-		sprintf(execStr, ">>>> EXEC: R[%d] = MEM[%d] = %08x <<<<\n\n",
+	} else if (currentInst.opcode == LD) {
+		sprintf(
+			execStr,
+			">>>> EXEC: R[%d] = MEM[%d] = %08x <<<<\n\n",
 			currentInst.dst,
 			num1,
 			mem[num1]);
-	}
-	else if (currentInst.opcode == ST)
-	{
-		sprintf(execStr, ">>>> EXEC: MEM[%d] = R[%d] = %08x <<<<\n\n",
+	} else if (currentInst.opcode == ST) {
+		sprintf(
+			execStr,
+			">>>> EXEC: MEM[%d] = R[%d] = %08x <<<<\n\n",
 			num1,
 			currentInst.src0,
 			registerBlk[currentInst.src0]);
-	}
-	else if (currentInst.opcode >= 16 && currentInst.opcode <= 20)
-	{
-		sprintf(execStr, ">>>> EXEC: %s %d, %d, %d <<<<\n\n",
+	} else if (currentInst.opcode >= 16 && currentInst.opcode <= 20) {
+		sprintf(
+			execStr,
+			">>>> EXEC: %s %d, %d, %d <<<<\n\n",
 			opcodeStrings[currentInst.opcode],
 			num0,
 			num1,
 			pc);
-	}
-	else //HALT . valid check was before
-	{
-		sprintf(execStr, ">>>> EXEC: HALT at PC %04x<<<<\nsim finished at pc %d, %d instructions", pc,pc,instructionNumber);
+	} else { //HALT . valid check was before
+		sprintf(execStr, ">>>> EXEC: HALT at PC %04x<<<<\nsim finished at pc %d, %d instructions", pc, pc, instructionNumber);
 	}
 
 	//write to file
-
 	fp = fopen(OUTPUT_TRACE_FILE, "a");
 	if (fp == NULL) {
 		printError();
@@ -176,9 +174,9 @@ static int traceExecLine(int num0, int num1)
 	return 0;
 }
 
-static int traceInstruction(bool validInstruction){
+static int traceInstruction(bool validInstruction) {
 	FILE *fp;
-	
+
 	if (instructionNumber == 0) {
 		fp = fopen(OUTPUT_TRACE_FILE, "w");
 		fprintf(fp, "program %s loaded, %d lines\n\n", inputName, inputMemoryLineCount);
@@ -219,8 +217,8 @@ r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x \nr[4] = %08x r[5] = %08x r[6] =
 	} else {
 		fprintf(
 			fp,
-			"--- instruction %d (%04d) @ PC %d (%04d) -------------------------------------\
-----------------------\npc = %04d, inst = %08x\n INVALID INSTRUCTION!",
+			"--- instruction %d (%04d) @ PC %d (%04d) -----------------------------------------------------------\n\
+pc = %04d, inst = %08x\n INVALID INSTRUCTION!",
 			instructionNumber,
 			instructionNumber,
 			pc,
@@ -235,25 +233,29 @@ r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x \nr[4] = %08x r[5] = %08x r[6] =
 }
 
 static bool excuteCurrentInstruction() {
-	bool validInstruction = true;
 	bool keepGoing = true;
-	bool error = (currentInst.dst > (REG_NUM - 1) || currentInst.src0 > (REG_NUM - 1) || currentInst.src1 > (REG_NUM - 1)) || (currentInst.dst <= 1 && currentInst.opcode <= 7);
+
+	// validations
+	bool error =
+		currentInst.dst > REG_NUM - 1
+		|| currentInst.src0 > REG_NUM - 1
+		|| currentInst.src1 > REG_NUM - 1
+		|| (currentInst.dst <= 1 && currentInst.opcode <= 7)
+		|| currentInst.opcode > 24
+		|| (currentInst.opcode > 9 && currentInst.opcode < 16)
+		|| (currentInst.opcode > 20 && currentInst.opcode < 24);
+
 	if (error) {  /*checks if register numbers are valid and if arithmetic command has illegal dst*/
-		validInstruction = false;
-		traceInstruction(validInstruction);
+		traceInstruction(false);
 		instructionNumber++;
 		return keepGoing;
 	}
-	
+
 	registerBlk[1] = currentInst.imm;
 	INT32 num0 = getNum(currentInst.src0);
 	INT32 num1 = getNum(currentInst.src1);
 
-	if (currentInst.opcode > 24 || (currentInst.opcode > 9 && currentInst.opcode < 16) || (currentInst.opcode > 20 && currentInst.opcode < 24)) {
-	    validInstruction = false;
-	}
-
-	traceInstruction(validInstruction);
+	traceInstruction(true);
 
 	switch (currentInst.opcode) {
 		case ADD:
@@ -326,7 +328,7 @@ static bool excuteCurrentInstruction() {
 		case HLT:
 			keepGoing = false;
 			break;
-			/*default:
+		/*default:
 			validInstruction = false;
 			break;*/
 	}
@@ -337,8 +339,8 @@ static bool excuteCurrentInstruction() {
 }
 
 int loadMemory(DWORD *buffer, size_t bufferLen, char *filePath) {
-	size_t i;
 	FILE *fp;
+	size_t i;
 
 	fp = fopen(filePath, "r");
 	if (fp == NULL) {
@@ -346,18 +348,14 @@ int loadMemory(DWORD *buffer, size_t bufferLen, char *filePath) {
 		return -1;
 	}
 
-	for (i = 0; i < bufferLen; i++) {
-		buffer[i] = 0;
-	}
-
-	i = 0;
+	memset(buffer, 0, bufferLen);
 	inputMemoryLineCount = 0;
-	while (i < bufferLen) {
+
+	for (i = 0; i < bufferLen; i++) {
 		fscanf(fp, "%x", buffer + i);
 		if (buffer[i] != 0x00000000) {
-		  inputMemoryLineCount = i+1;
+		  inputMemoryLineCount = i + 1;
 		}
-		i++;
 	}
 
 	fclose(fp);
@@ -414,7 +412,7 @@ int dumpMemory(DWORD *buffer, size_t bufferLen, char *filePath) {
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
-		printf("Usage: %s <input_file>", argv[0]);
+		printf("Usage: %s <input_file>\n", argv[0]);
 		return 0;
 	}
 
