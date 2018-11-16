@@ -86,8 +86,8 @@ static void assemble_program(char *program_name)
 	 * Constants are planted into the memory somewhere after the program code:
 	 */
 
-        mem[1000] = 2;
-	mem[1001] = 3;
+	mem[1000] = -2;
+	mem[1001] = 10;
 	last_addr = 1003;
 
 	fp = fopen(program_name, "w");
