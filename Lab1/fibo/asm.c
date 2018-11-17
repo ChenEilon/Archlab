@@ -53,8 +53,8 @@ static void assemble_program(char *program_name)
 	 */
 	asm_cmd(ADD, 2, 1, 0, 1);    // 0: R2 = 1
 	asm_cmd(ADD, 3, 1, 0, 1);    // 1: R3 = 1
-	asm_cmd(ST, 0, 2, 1, 1000);  // 2: MEM[1000] = R2
-	asm_cmd(ST, 0, 3, 1, 1001);  // 3: MEM[1001] = R3
+	asm_cmd(ST,  0, 2, 1, 1000); // 2: MEM[1000] = R2
+	asm_cmd(ST,  0, 3, 1, 1001); // 3: MEM[1001] = R3
 	asm_cmd(ADD, 4, 1, 0, 1002); // 4: R4 = 1002
 	asm_cmd(ADD, 5, 1, 0, 0);    // 5: R5 = 0
 	asm_cmd(ADD, 6, 1, 0, 98);   // 6: R6 = 98
