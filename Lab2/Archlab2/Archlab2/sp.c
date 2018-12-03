@@ -146,7 +146,7 @@ static void sp_exec0(sp_t *sp)
 	sp_registers_t *spro = sp->spro;
 	sp_registers_t *sprn = sp->sprn;
 
-	switch (spro->inst) {
+	switch (spro->opcode) {
 		case ADD:
 			sprn->aluout = spro->alu0 + spro->alu1;
 			break;
@@ -208,7 +208,7 @@ static void sp_exec1(sp_t *sp)
 
 	sprn->pc = spro->pc + 1;
 
-	switch (spro->inst) {
+	switch (spro->opcode) {
 		case ADD:
 		case SUB:
 		case LSF:
@@ -294,7 +294,7 @@ static void sp_ctl(sp_t *sp)
 			break;
 
 		case CTL_STATE_DEC1:
-			if (spro->inst == LHI) {
+			if (spro->opcode == LHI) {
 				sprn->alu0 = sp_reg_value(spro, spro->dst);
 				sprn->alu1 = spro->immediate;
 			} else {
@@ -310,7 +310,7 @@ static void sp_ctl(sp_t *sp)
 			break;
 
 		case CTL_STATE_EXEC1:
-			if (spro->inst == HLT) {
+			if (spro->opcode == HLT) {
 				sprn->ctl_state = CTL_STATE_IDLE;
 				break;
 			}
