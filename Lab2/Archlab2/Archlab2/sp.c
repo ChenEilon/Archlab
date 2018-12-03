@@ -311,6 +311,8 @@ static void sp_ctl(sp_t *sp)
 
 		case CTL_STATE_EXEC1:
 			if (spro->opcode == HLT) {
+				dump_sram(sp);
+				llsim_stop();
 				sprn->ctl_state = CTL_STATE_IDLE;
 				break;
 			}
