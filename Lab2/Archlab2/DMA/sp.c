@@ -476,8 +476,8 @@ static void sp_dma(sp_t *sp)
 			if (spro->ctl_state == CTL_STATE_IDLE
 				|| spro->ctl_state == CTL_STATE_FETCH0
 				|| spro->ctl_state == CTL_STATE_FETCH0
-				|| spro->ctl_state == CTL_STATE_DEC1 && spro->opcode == LD
-				|| spro->ctl_state == CTL_STATE_EXEC0 && (spro->opcode == LD || spro->opcode == ST)
+				|| (spro->ctl_state == CTL_STATE_DEC1 && spro->opcode == LD)
+				|| (spro->ctl_state == CTL_STATE_EXEC0 && (spro->opcode == LD || spro->opcode == ST))
 				|| spro->ctl_state == CTL_STATE_EXEC1)
 				break;
 			llsim_mem_read(sp->sram, spro->dma_src);
@@ -492,8 +492,8 @@ static void sp_dma(sp_t *sp)
 		case DMA_STATE_WRITE:
 			if (spro->ctl_state == CTL_STATE_FETCH0
 				|| spro->ctl_state == CTL_STATE_FETCH0
-				|| spro->ctl_state == CTL_STATE_EXEC0 && spro->opcode == LD
-				|| spro->ctl_state == CTL_STATE_EXEC1 && (spro->opcode == LD || spro->opcode == ST))
+				|| (spro->ctl_state == CTL_STATE_EXEC0 && spro->opcode == LD)
+				|| (spro->ctl_state == CTL_STATE_EXEC1 && (spro->opcode == LD || spro->opcode == ST)))
 				break;
 			llsim_mem_set_datain(sp->sram, spro->dma_reg, 31, 0);
 			llsim_mem_write(sp->sram, spro->dma_dst);
