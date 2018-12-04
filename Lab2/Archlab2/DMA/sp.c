@@ -436,11 +436,11 @@ static void sp_ctl(sp_t *sp)
 	fprintf(cycle_trace_fp, "alu1 %08x\n", spro->alu1);
 	fprintf(cycle_trace_fp, "aluout %08x\n", spro->aluout);
 	fprintf(cycle_trace_fp, "cycle_counter %08x\n", spro->cycle_counter);
-	fprintf(cycle_trace_fp, "ctl_state %08x\n\n", spro->ctl_state);
-	fprintf(cycle_trace_fp, "dma_state %08x\n\n", spro->dma_state);
-	fprintf(cycle_trace_fp, "dma_src %08x\n\n", spro->dma_src);
-	fprintf(cycle_trace_fp, "dma_dst %08x\n\n", spro->dma_dst);
-	fprintf(cycle_trace_fp, "dma_counter %08x\n\n", spro->dma_counter);
+	fprintf(cycle_trace_fp, "ctl_state %08x\n", spro->ctl_state);
+	fprintf(cycle_trace_fp, "dma_state %08x\n", spro->dma_state);
+	fprintf(cycle_trace_fp, "dma_src %08x\n", spro->dma_src);
+	fprintf(cycle_trace_fp, "dma_dst %08x\n", spro->dma_dst);
+	fprintf(cycle_trace_fp, "dma_counter %08x\n", spro->dma_counter);
 	fprintf(cycle_trace_fp, "dma_reg %08x\n\n", spro->dma_reg);
 
 	sprn->cycle_counter = spro->cycle_counter + 1;
