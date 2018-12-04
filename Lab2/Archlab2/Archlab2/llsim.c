@@ -188,7 +188,7 @@ llsim_memory_t *llsim_allocate_memory(llsim_unit_t *unit, char *name, int bits, 
 	mem->bits = bits;
 	mem->height = height;
 	mem->dp = dp;
-	mem->data = (int *) llsim_malloc(height * mem->entry_size * sizeof(int));
+	mem->data = (int *) llsim_malloc((1+height) * mem->entry_size * sizeof(int));
 	mem->datain = (int *) llsim_malloc(mem->entry_size);
 	mem->dataout = (int *) llsim_malloc(mem->entry_size);
 	mem->next = unit->mems;
