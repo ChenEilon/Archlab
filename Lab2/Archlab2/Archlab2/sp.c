@@ -334,11 +334,14 @@ static void sp_exec1(sp_t *sp)
 		case JLE:
 		case JEQ:
 		case JNE:
-			if (!spro->aluout) {
-				break;
+			if (spro->aluout) {
+				sprn->pc = spro->immediate;
+				sprn->r[7] = spro->pc;
 			}
+			break;
+
 		case JIN:
-			sprn->pc = spro->immediate;
+			sprn->pc = spro->alu0;
 			sprn->r[7] = spro->pc;
 			break;
 	}
