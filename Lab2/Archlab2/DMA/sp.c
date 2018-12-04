@@ -269,8 +269,8 @@ sim finished at pc %d, %d instructions",
 				">>>> EXEC: DMA %d -> %d (%d) <<<<\n\n",
 				sp_reg_value(spro, spro->src1),
 				sp_reg_value(spro, spro->dst),
-				sp_reg_value(spro, spro->src0)
-			);
+				sp_reg_value(spro, spro->src0));
+			break;
 
 		case POL:
 			fprintf(
@@ -278,6 +278,7 @@ sim finished at pc %d, %d instructions",
 				">>>> EXEC: R[%d] = POL = %d <<<<\n\n",
 				spro->dst,
 				sp_reg_value(spro, spro->dst));
+			break;
 	}
 }
 
