@@ -55,7 +55,7 @@ static void assemble_program(char *program_name)
 	 */
 	asm_cmd(ADD, 2, 1, 0, 200); // 0: R2 = 200
 	asm_cmd(ADD, 3, 1, 0, 500); // 1: R3 = 500
-    asm_cmd(DMA, 3, 1, 2, 100); // 2: Copy MEM[R2:R2+200] to MEM[R3:R3+200]
+    asm_cmd(DMA, 3, 1, 2, 100); // 2: Copy MEM[R2:R2+100] to MEM[R3:R3+100]
 	asm_cmd(ADD, 2, 1, 0, 30); // 3: R2 = 30
 	asm_cmd(ADD, 3, 1, 0, 1); // 4: R3 = 1
 	asm_cmd(ADD, 4, 1, 0, 8); // 5: R4 = 8
