@@ -262,6 +262,22 @@ sim finished at pc %d, %d instructions",
 				spro->pc,
 				nr_simulated_instructions);
 			break;
+
+		case DMA:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: DMA %d -> %d (%d) <<<<\n\n",
+				sp_reg_value(spro, spro->src1),
+				sp_reg_value(spro, spro->dst),
+				sp_reg_value(spro, spro->src0)
+			);
+
+		case POL:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: R[%d] = POL = %d <<<<\n\n",
+				spro->dst,
+				sp_reg_value(spro, spro->dst));
 	}
 }
 
