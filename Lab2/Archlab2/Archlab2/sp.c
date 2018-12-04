@@ -220,6 +220,7 @@ static void sp_trace_exec(sp_registers_t *spro)
 		case JLE:
 		case JEQ:
 		case JNE:
+		case JIN:
 			fprintf(
 				inst_trace_fp,
 				">>>> EXEC: %s %d, %d, %d <<<<\n\n",
@@ -333,10 +334,12 @@ static void sp_exec1(sp_t *sp)
 		case JLE:
 		case JEQ:
 		case JNE:
-			if (spro->aluout) {
-				sprn->pc = spro->immediate;
-				sprn->r[7] = spro->pc;
+			if (!spro->aluout) {
+				break;
 			}
+		case JIN:
+			sprn->pc = spro->immediate;
+			sprn->r[7] = spro->pc;
 			break;
 	}
 }
