@@ -54,7 +54,7 @@ static void assemble_program(char *program_name)
 	 * Program starts here
 	 */
 	asm_cmd(ADD, 2, 1, 0, 200); // 0: R2 = 200
-	asm_cmd(ADD, 3, 1, 0, 500); // 1: R3 = 600
+	asm_cmd(ADD, 3, 1, 0, 500); // 1: R3 = 500
     asm_cmd(DMA, 3, 1, 2, 100); // 2: Copy MEM[R2:R2+200] to MEM[R3:R3+200]
 	asm_cmd(ADD, 2, 1, 0, 30); // 3: R2 = 30
 	asm_cmd(ADD, 3, 1, 0, 1); // 4: R3 = 1
@@ -69,7 +69,19 @@ static void assemble_program(char *program_name)
 	asm_cmd(JEQ, 0, 0, 0, 6); // 13: PC = 6
     asm_cmd(POL, 2, 0, 0, 0); // 14: R2 = 1 if DMA is running, else 0
     asm_cmd(JNE, 0, 2, 0, 14); // 15: PC = 14 if R2 != 0
-	asm_cmd(HLT, 0, 0, 0, 0); // 16: HALT
+    asm_cmd(ADD, 2, 1, 0, 200); // 16: R2 = 200
+    asm_cmd(ADD, 3, 1, 0, 500); // 17: R3 = 500
+    asm_cmd(ADD, 4, 1, 0, 600); // 18: R4 = 600
+	asm_cmd(JEQ, 0, 3, 4, 27); // 19: PC = 27 if R3 == R4
+	asm_cmd(LD,  5, 0, 2, 0); // 20: R5 = MEM[R2]
+	asm_cmd(LD,  6, 0, 3, 0); // 21: R6 = MEM[R3]
+	asm_cmd(ADD, 2, 2, 1, 1); // 22: R2 = R2 + 1
+	asm_cmd(ADD, 3, 3, 1, 1); // 23: R3 = R3 + 1
+	asm_cmd(JEQ, 0, 5, 6, 19); // 24: PC = 19 if R5 == R6
+    asm_cmd(ADD, 2, 1, 0, 0); // 25: R2 = 0
+	asm_cmd(HLT, 0, 0, 0, 0); // 26: HALT
+    asm_cmd(ADD, 2, 1, 0, 1); // 27: R2 = 1
+	asm_cmd(HLT, 0, 0, 0, 0); // 28: HALT
 	
 	/* 
 	 * Constants are planted into the memory somewhere after the program code:
