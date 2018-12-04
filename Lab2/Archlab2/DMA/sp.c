@@ -282,13 +282,28 @@ static void sp_dec1(sp_t *sp)
 	sp_registers_t *spro = sp->spro;
 	sp_registers_t *sprn = sp->sprn;
 
-	if (spro->opcode == LHI) {
-		sprn->alu0 = sp_reg_value(spro, spro->dst);
-		sprn->alu1 = spro->immediate;
-	}
-	else {
-		sprn->alu0 = sp_reg_value(spro, spro->src0);
-		sprn->alu1 = sp_reg_value(spro, spro->src1);
+	switch (spro->opcode)
+	{
+		case LHI:
+			sprn->alu0 = sp_reg_value(spro, spro->dst);
+			sprn->alu1 = spro->immediate;
+			break;
+
+		case DMA:
+			sprn->dma_counter = sp_reg_value(spro, spro->src0);
+			sprn->dma_src = sp_reg_value(spro, spro->src1);
+			sprn->dma_dst = sp_reg_value(spro, spro->dst);
+			break;
+
+		case POL:
+			sprn->alu0 = spro->dma_counter;
+			sprn->alu1 = 0;
+			break;
+
+		default:
+			sprn->alu0 = sp_reg_value(spro, spro->src0);
+			sprn->alu1 = sp_reg_value(spro, spro->src1);
+			break;
 	}
 }
 
@@ -347,6 +362,7 @@ static void sp_exec0(sp_t *sp)
 			break;
 
 		case JNE:
+		case POL:
 			sprn->aluout = spro->alu0 != spro->alu1;
 			break;
 	}
@@ -368,6 +384,7 @@ static void sp_exec1(sp_t *sp)
 		case OR:
 		case XOR:
 		case LHI:
+		case POL:
 			sprn->r[spro->dst] = spro->aluout;
 			break;
 
@@ -420,6 +437,11 @@ static void sp_ctl(sp_t *sp)
 	fprintf(cycle_trace_fp, "aluout %08x\n", spro->aluout);
 	fprintf(cycle_trace_fp, "cycle_counter %08x\n", spro->cycle_counter);
 	fprintf(cycle_trace_fp, "ctl_state %08x\n\n", spro->ctl_state);
+	fprintf(cycle_trace_fp, "dma_state %08x\n\n", spro->dma_state);
+	fprintf(cycle_trace_fp, "dma_src %08x\n\n", spro->dma_src);
+	fprintf(cycle_trace_fp, "dma_dst %08x\n\n", spro->dma_dst);
+	fprintf(cycle_trace_fp, "dma_counter %08x\n\n", spro->dma_counter);
+	fprintf(cycle_trace_fp, "dma_reg %08x\n\n", spro->dma_reg);
 
 	sprn->cycle_counter = spro->cycle_counter + 1;
 
