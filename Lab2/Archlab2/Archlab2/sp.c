@@ -175,6 +175,11 @@ r[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
 
 static void sp_trace_exec(sp_registers_t *spro)
 {
+	if (nr_simulated_instructions == 0) {
+		fprintf(inst_trace_fp, "\n");
+		return;
+	}
+
 	switch (spro->opcode) {
 		case ADD:
 		case SUB:
@@ -370,8 +375,7 @@ static void sp_ctl(sp_t *sp)
 			break;
 
 		case CTL_STATE_FETCH0:
-			if (nr_simulated_instructions > 0)
-				sp_trace_exec(spro);
+			sp_trace_exec(spro);
 			llsim_mem_read(sp->sram, spro->pc);
 			sprn->ctl_state = CTL_STATE_FETCH1;
 			break;
