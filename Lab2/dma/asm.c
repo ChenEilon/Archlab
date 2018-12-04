@@ -53,9 +53,9 @@ static void assemble_program(char *program_name)
 	/*
 	 * Program starts here
 	 */
-	asm_cmd(ADD, 2, 1, 0, 102); // 0: R2 = 100
+	asm_cmd(ADD, 2, 1, 0, 110); // 0: R2 = 110
 	asm_cmd(ADD, 3, 1, 0, 200); // 1: R3 = 200
-    asm_cmd(DMA, 3, 1, 2, 10); // 2: Copy MEM[R2:R2+10] to MEM[R3:R3+10]
+    asm_cmd(DMA, 3, 1, 2, 30); // 2: Copy MEM[R2:R2+30] to MEM[R3:R3+30]
 	asm_cmd(ADD, 2, 1, 0, 30); // 3: R2 = 30
 	asm_cmd(ADD, 3, 1, 0, 1); // 4: R3 = 1
 	asm_cmd(ADD, 4, 1, 0, 8); // 5: R4 = 8
@@ -77,10 +77,10 @@ static void assemble_program(char *program_name)
 	for (i = 0; i < 8; i++)
 		mem[30+i] = i;
     
-    for (i = 0; i < 20; i++)
+    for (i = 0; i < 50; i++)
         mem[100+i] = i;
 
-	last_addr = 120;
+	last_addr = 150;
 
 	fp = fopen(program_name, "w");
 	if (fp == NULL) {
