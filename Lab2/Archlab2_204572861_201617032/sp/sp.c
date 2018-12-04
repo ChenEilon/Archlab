@@ -242,6 +242,32 @@ sim finished at pc %d, %d instructions",
 	}
 }
 
+static void sp_dec0(sp_t *sp)
+{
+	sp_registers_t *spro = sp->spro;
+	sp_registers_t *sprn = sp->sprn;
+
+	sprn->opcode = sbs(spro->inst, 29, 25);
+	sprn->dst = sbs(spro->inst, 24, 22);
+	sprn->src0 = sbs(spro->inst, 21, 19);
+	sprn->src1 = sbs(spro->inst, 18, 16);
+	sprn->immediate = ssbs(spro->inst, 15, 0);
+}
+
+static void sp_dec1(sp_t *sp)
+{
+	sp_registers_t *spro = sp->spro;
+	sp_registers_t *sprn = sp->sprn;
+
+	if (spro->opcode == LHI) {
+		sprn->alu0 = sp_reg_value(spro, spro->dst);
+		sprn->alu1 = spro->immediate;
+	} else {
+		sprn->alu0 = sp_reg_value(spro, spro->src0);
+		sprn->alu1 = sp_reg_value(spro, spro->src1);
+	}
+}
+
 static void sp_exec0(sp_t *sp)
 {
 	sp_registers_t *spro = sp->spro;
@@ -392,23 +418,13 @@ static void sp_ctl(sp_t *sp)
 			break;
 
 		case CTL_STATE_DEC0:
-			sprn->opcode = sbs(spro->inst, 29, 25);
-			sprn->dst = sbs(spro->inst, 24, 22);
-			sprn->src0 = sbs(spro->inst, 21, 19);
-			sprn->src1 = sbs(spro->inst, 18, 16);
-			sprn->immediate = ssbs(spro->inst, 15, 0);
+			sp_dec0(sp);
 			sprn->ctl_state = CTL_STATE_DEC1;
 			break;
 
 		case CTL_STATE_DEC1:
 			sp_trace_inst(spro);
-			if (spro->opcode == LHI) {
-				sprn->alu0 = sp_reg_value(spro, spro->dst);
-				sprn->alu1 = spro->immediate;
-			} else {
-				sprn->alu0 = sp_reg_value(spro, spro->src0);
-				sprn->alu1 = sp_reg_value(spro, spro->src1);
-			}
+			sp_dec1(sp);
 			sprn->ctl_state = CTL_STATE_EXEC0;
 			break;
 
