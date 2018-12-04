@@ -65,6 +65,27 @@ typedef struct sp_registers_s {
 	#define CTL_STATE_DEC1		4
 	#define CTL_STATE_EXEC0		5
 	#define CTL_STATE_EXEC1		6
+
+	// 2 bit dma state
+	int dma_state;
+
+	// dma states
+	#define DMA_STATE_IDLE		0
+	#define DMA_STATE_READ		1
+	#define DMA_STATE_EXTRACT	2
+	#define DMA_STATE_WRITE		3
+
+	// 16 bit dma source address
+	int dma_src;
+
+	// 16 bit dma destination address
+	int dma_dst;
+
+	// 16 bit dma counter
+	int dma_counter;
+
+	// 32 bit dma register
+	int dma_reg;
 } sp_registers_t;
 
 /*
@@ -407,6 +428,10 @@ static void sp_ctl(sp_t *sp)
 			if (spro->opcode == LHI) {
 				sprn->alu0 = sp_reg_value(spro, spro->dst);
 				sprn->alu1 = spro->immediate;
+			} else if (spro->opcode == DMA) {
+				sprn->dma_counter = sp_reg_value(spro, spro->src0);
+				sprn->dma_src = sp_reg_value(spro, spro->src1);
+				sprn->dma_dst = sp_reg_value(spro, spro->dst);
 			} else {
 				sprn->alu0 = sp_reg_value(spro, spro->src0);
 				sprn->alu1 = sp_reg_value(spro, spro->src1);
@@ -435,6 +460,54 @@ static void sp_ctl(sp_t *sp)
 	}
 }
 
+static void sp_dma(sp_t *sp)
+{
+	sp_registers_t *spro = sp->spro;
+	sp_registers_t *sprn = sp->sprn;
+
+	switch (spro->dma_state)
+	{
+		case DMA_STATE_IDLE:
+			if (spro->dma_counter)
+				sprn->dma_state = DMA_STATE_READ;
+			break;
+
+		case DMA_STATE_READ:
+			if (spro->ctl_state == CTL_STATE_IDLE
+				|| spro->ctl_state == CTL_STATE_FETCH0
+				|| spro->ctl_state == CTL_STATE_FETCH0
+				|| spro->ctl_state == CTL_STATE_DEC1 && spro->opcode == LD
+				|| spro->ctl_state == CTL_STATE_EXEC0 && (spro->opcode == LD || spro->opcode == ST)
+				|| spro->ctl_state == CTL_STATE_EXEC1)
+				break;
+			llsim_mem_read(sp->sram, spro->dma_src);
+			sprn->dma_state = DMA_STATE_EXTRACT;
+			break;
+
+		case DMA_STATE_EXTRACT:
+			sprn->dma_reg = llsim_mem_extract_dataout(sp->sram, 31, 0);
+			sprn->dma_state = DMA_STATE_WRITE;
+			break;
+
+		case DMA_STATE_WRITE:
+			if (spro->ctl_state == CTL_STATE_FETCH0
+				|| spro->ctl_state == CTL_STATE_FETCH0
+				|| spro->ctl_state == CTL_STATE_EXEC0 && spro->opcode == LD
+				|| spro->ctl_state == CTL_STATE_EXEC1 && (spro->opcode == LD || spro->opcode == ST))
+				break;
+			llsim_mem_set_datain(sp->sram, spro->dma_reg, 31, 0);
+			llsim_mem_write(sp->sram, spro->dma_dst);
+			sprn->dma_src = spro->dma_src + 1;
+			sprn->dma_dst = spro->dma_dst + 1;
+			sprn->dma_counter = spro->dma_counter - 1;
+			if (spro->dma_counter == 1)
+				sprn->dma_state = DMA_STATE_IDLE;
+			else
+				sprn->dma_state = DMA_STATE_READ;
+			break;
+	}
+}
+
 static void sp_run(llsim_unit_t *unit)
 {
 	sp_t *sp = (sp_t *) unit->private;
@@ -448,6 +521,7 @@ static void sp_run(llsim_unit_t *unit)
 	sp->sram->write = 0;
 
 	sp_ctl(sp);
+	sp_dma(sp);
 }
 
 static void sp_generate_sram_memory_image(sp_t *sp, char *program_name)
@@ -501,6 +575,12 @@ static void sp_register_all_registers(sp_t *sp)
 	llsim_register_register("sp", "immediate", 32, 0, &spro->immediate, &sprn->immediate);
 	llsim_register_register("sp", "cycle_counter", 32, 0, &spro->cycle_counter, &sprn->cycle_counter);
 	llsim_register_register("sp", "ctl_state", 3, 0, &spro->ctl_state, &sprn->ctl_state);
+
+	llsim_register_register("sp", "dma_state", 2, 0, &spro->dma_state, &sprn->dma_state);
+	llsim_register_register("sp", "dma_src", 16, 0, &spro->dma_src, &sprn->dma_src);
+	llsim_register_register("sp", "dma_dst", 16, 0, &spro->dma_dst, &sprn->dma_dst);
+	llsim_register_register("sp", "dma_counter", 16, 0, &spro->dma_counter, &sprn->dma_counter);
+	llsim_register_register("sp", "dma_reg", 32, 0, &spro->dma_reg, &sprn->dma_reg);
 }
 
 void sp_init(char *program_name)
