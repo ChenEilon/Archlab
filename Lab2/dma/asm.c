@@ -56,7 +56,7 @@ static void assemble_program(char *program_name)
 	asm_cmd(ADD, 2, 1, 0, 102); // 0: R2 = 100
 	asm_cmd(ADD, 3, 1, 0, 200); // 1: R3 = 200
     asm_cmd(DMA, 3, 1, 2, 10); // 2: Copy MEM[R2:R2+10] to MEM[R3:R3+10]
-	asm_cmd(ADD, 2, 1, 0, 15); // 3: R2 = 15
+	asm_cmd(ADD, 2, 1, 0, 30); // 3: R2 = 30
 	asm_cmd(ADD, 3, 1, 0, 1); // 4: R3 = 1
 	asm_cmd(ADD, 4, 1, 0, 8); // 5: R4 = 8
 	asm_cmd(JEQ, 0, 3, 4, 14); // 6: PC = 14 if R3 == R4
@@ -75,7 +75,7 @@ static void assemble_program(char *program_name)
 	 * Constants are planted into the memory somewhere after the program code:
 	 */
 	for (i = 0; i < 8; i++)
-		mem[15+i] = i;
+		mem[30+i] = i;
     
     for (i = 0; i < 20; i++)
         mem[100+i] = i;
