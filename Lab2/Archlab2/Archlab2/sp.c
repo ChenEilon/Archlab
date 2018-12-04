@@ -141,6 +141,101 @@ static int sp_reg_value(sp_registers_t *spro, int reg_num)
 	return 0;
 }
 
+static void sp_trace_inst(sp_registers_t *spro)
+{
+	fprintf(
+		inst_trace_fp,
+		"--- instruction %d (%04x) @ PC %d (%04x) -----------------------------------------------------------\n\
+pc = %04d, inst = %08x, opcode = %d (%s), dst = %d, src0 = %d, src1 = %d, immediate = %08x\n\
+r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x \n\
+r[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
+		nr_simulated_instructions,
+		nr_simulated_instructions,
+		spro->pc,
+		spro->pc,
+		spro->pc,
+		spro->inst,
+		spro->opcode,
+		opcode_name[spro->opcode],
+		spro->dst,
+		spro->src0,
+		spro->src1,
+		spro->immediate,
+		sp_reg_value(spro, 0),
+		sp_reg_value(spro, 1),
+		sp_reg_value(spro, 2),
+		sp_reg_value(spro, 3),
+		sp_reg_value(spro, 4),
+		sp_reg_value(spro, 5),
+		sp_reg_value(spro, 6),
+		sp_reg_value(spro, 7));
+
+	nr_simulated_instructions++;
+}
+
+static void sp_trace_exec(sp_registers_t *spro)
+{
+	switch (spro->opcode) {
+		case ADD:
+		case SUB:
+		case LSF:
+		case RSF:
+		case AND:
+		case OR:
+		case XOR:
+		case LHI:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: R[%d] = %d %s %d <<<<\n\n",
+				spro->dst,
+				spro->alu0,
+				opcode_name[spro->opcode],
+				spro->alu1);
+			break;
+
+		case LD:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: R[%d] = MEM[%d] = %08x <<<<\n\n",
+				spro->dst,
+				spro->alu1,
+				sp_reg_value(spro, spro->dst));
+			break;
+
+		case ST:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: MEM[%d] = R[%d] = %08x <<<<\n\n",
+				spro->alu1,
+				spro->src0,
+				spro->alu0);
+			break;
+
+		case JLT:
+		case JLE:
+		case JEQ:
+		case JNE:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: %s %d, %d, %d <<<<\n\n",
+				opcode_name[spro->opcode],
+				spro->alu0,
+				spro->alu1,
+				spro->pc);
+			break;
+
+		case HLT:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: HALT at PC %04x<<<<\n\
+sim finished at pc %d, %d instructions",
+				spro->pc,
+				spro->pc,
+				nr_simulated_instructions);
+			break;
+	}
+}
+
 static void sp_exec0(sp_t *sp)
 {
 	sp_registers_t *spro = sp->spro;
@@ -275,6 +370,8 @@ static void sp_ctl(sp_t *sp)
 			break;
 
 		case CTL_STATE_FETCH0:
+			if (nr_simulated_instructions > 0)
+				sp_trace_exec(spro);
 			llsim_mem_read(sp->sram, spro->pc);
 			sprn->ctl_state = CTL_STATE_FETCH1;
 			break;
@@ -294,6 +391,7 @@ static void sp_ctl(sp_t *sp)
 			break;
 
 		case CTL_STATE_DEC1:
+			sp_trace_inst(spro);
 			if (spro->opcode == LHI) {
 				sprn->alu0 = sp_reg_value(spro, spro->dst);
 				sprn->alu1 = spro->immediate;
@@ -311,6 +409,9 @@ static void sp_ctl(sp_t *sp)
 
 		case CTL_STATE_EXEC1:
 			if (spro->opcode == HLT) {
+				sp_trace_exec(spro);
+				fclose(inst_trace_fp);
+				fclose(cycle_trace_fp);
 				dump_sram(sp);
 				llsim_stop();
 				sprn->ctl_state = CTL_STATE_IDLE;
