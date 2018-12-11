@@ -1,0 +1,52 @@
+ncverilog(64): 14.10-s021: (c) Copyright 1995-2015 Cadence Design Systems, Inc.
+TOOL:	ncverilog	14.10-s021: Started on Dec 11, 2018 at 18:21:39 IST
+ncverilog
+	+access+rw
+	fulladder_tb.v
+	fulladder.v
+Recompiling... reason: file './fulladder_tb.v' is newer than expected.
+	expected: Tue Dec 11 18:14:54 2018
+	actual:   Tue Dec 11 18:21:35 2018
+file: fulladder_tb.v
+	module worklib.main:v
+		errors: 0, warnings: 0
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.fulladder:v <0x38fa1b87>
+			streams:   0, words:     0
+		worklib.main:v <0x3342ae0a>
+			streams:   5, words:  7528
+	Building instance specific data structures.
+	Loading native compiled code:     .................... Done
+	Design hierarchy summary:
+		             Instances  Unique
+		Modules:             4       3
+		Primitives:          5       3
+		Registers:           3       3
+		Scalar wires:        4       -
+		Always blocks:       1       1
+		Initial blocks:      1       1
+		Cont. assignments:   0       1
+		Pseudo assignments:  3       3
+	Writing initial simulation snapshot: worklib.main:v
+Loading snapshot worklib.main:v .................... Done
+ncsim> source /home/cadence/tools/INCISIV/latest/tools/inca/files/ncsimrc
+ncsim> run
+time=                   0: 0 + 0 = 0, carry_in = 0, carry_out = 0
+
+time=                   5: 0 + 1 = 1, carry_in = 0, carry_out = 0
+
+time=                  15: 1 + 1 = 0, carry_in = 0, carry_out = 1
+
+time=                  20: 0 + 0 = 1, carry_in = 1, carry_out = 0
+
+time=                  25: 0 + 1 = 0, carry_in = 1, carry_out = 1
+
+time=                  35: 1 + 1 = 1, carry_in = 1, carry_out = 1
+
+Simulation complete via $finish(1) at time 40 NS + 0
+./fulladder_tb.v:31     $finish;
+ncsim> exit
+TOOL:	ncverilog	14.10-s021: Exiting on Dec 11, 2018 at 18:21:39 IST  (total: 00:00:00)
