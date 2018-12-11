@@ -3,7 +3,7 @@ module main;
   wire sum, co;
   fulladder fadd(sum, co, a, b, ci);
 
-  always@(a or b or ci)
+  always@(sum or co)
   begin
     $display("time=%d: %b + %b = %b, carry_in = %b, carry_out = %b\n", $time, a, b, sum, ci, co);
   end
