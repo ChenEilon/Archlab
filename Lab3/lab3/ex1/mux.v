@@ -4,7 +4,6 @@ module mux1(a,b,select,result);
    input select;
    output result;
 
-   wire result;
    assign result = (select)?b:a;
 endmodule
 
