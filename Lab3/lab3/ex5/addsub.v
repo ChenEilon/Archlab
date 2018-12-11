@@ -1,4 +1,4 @@
-`include "../ex5/add4.v"
+`include "../ex4/add4.v"
 module	addsub( result, operand_a, operand_b, mode );
 
 	input	[3:0]	operand_a, operand_b;
