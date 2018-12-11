@@ -1,0 +1,29 @@
+ncverilog(64): 14.10-s021: (c) Copyright 1995-2015 Cadence Design Systems, Inc.
+TOOL:	ncverilog	14.10-s021: Started on Dec 11, 2018 at 16:36:52 IST
+ncverilog
+	+access+rw
+	mux_tb.v
+	mux.v
+Loading snapshot worklib.main:v .................... Done
+ncsim> source /home/cadence/tools/INCISIV/latest/tools/inca/files/ncsimrc
+ncsim> run
+time=                   0: a 0, b 0, select 0, mux1 0, mux2 0
+
+time=                   5: a 0, b 0, select 1, mux1 0, mux2 0
+
+time=                  10: a 0, b 1, select 0, mux1 0, mux2 0
+
+time=                  15: a 0, b 1, select 1, mux1 1, mux2 1
+
+time=                  20: a 1, b 0, select 0, mux1 1, mux2 1
+
+time=                  25: a 1, b 0, select 1, mux1 0, mux2 0
+
+time=                  30: a 1, b 1, select 0, mux1 1, mux2 1
+
+time=                  35: a 1, b 1, select 1, mux1 1, mux2 1
+
+Simulation complete via $finish(1) at time 40 NS + 0
+./mux_tb.v:28 	$finish;
+ncsim> exit
+TOOL:	ncverilog	14.10-s021: Exiting on Dec 11, 2018 at 16:36:53 IST  (total: 00:00:01)
