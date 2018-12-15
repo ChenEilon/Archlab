@@ -17,24 +17,24 @@ module parity(clk, in, reset, out);
       state <= zero;
     else
       case (state)
-        zero:
-          out <= in;
+        zero: begin
           state <= in;
-        one:
-          out <= neg_in;
+        end
+        one: begin
           state <= neg_in;
+        end
       endcase
     end
 
   always @(state) 
   begin
     case (state)
-      zero:
-        out <= in;
-        state <= in;
-      one:
-        out <= neg_in;
-        state <= neg_in;
+      zero: begin
+        out <= zero;
+      end
+      one: begin
+        out <= one;
+      end
     endcase
   end
 
