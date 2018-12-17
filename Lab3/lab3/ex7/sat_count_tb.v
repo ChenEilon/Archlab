@@ -222,7 +222,7 @@ initial begin
 	if( err_num==0 )
 		$display( "\nPASSED ALL TESTS\n" );
 	else
-		$display( "\nFail, error number = %d\n", error_num );
+		$display( "\nFail, error number = %d\n", err_num );
 	
 	#10 $finish;
 	end

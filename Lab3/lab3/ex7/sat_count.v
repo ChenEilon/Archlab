@@ -4,6 +4,7 @@ module sat_count(clk, reset, branch, taken, prediction);
    output prediction;
    
    reg[N:0] counter;
+   reg prediction;
    
    initial
    begin
@@ -12,7 +13,10 @@ module sat_count(clk, reset, branch, taken, prediction);
    
     always@ (posedge clk,reset,branch, taken)
     begin
-        assign prediction = (counter >= 2**(N-1))? 1 : 0 ;
+        if (counter >= 2**(N-1))
+            prediction = 1;
+        else
+            prediction = 0;
     end
    
    always @(reset, taken)
