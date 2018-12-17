@@ -20,8 +20,6 @@ initial begin
 	$dumpfile("waves.vcd");
 	$dumpvars;
 
-	$display( "\nTest subtraction mode." );
-	
     reset = 1;
     reset = 0;
     
