@@ -129,6 +129,6 @@ module main;
     if (ok)
       $display("PASSED ALL TESTS");
     
-    $finish
+    $finish;
   end
 endmodule
