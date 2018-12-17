@@ -12,10 +12,7 @@ module sat_count(clk, reset, branch, taken, prediction);
    
     always@ (posedge clk,reset,branch, taken)
     begin
-        if(counter >= 2**(N-1))
-            prediction = 1;
-        else
-            prediction = 0;
+        assign prediction = (counter >= 2**(N-1))? 1 : 0 ;
     end
    
    always @(reset, taken)

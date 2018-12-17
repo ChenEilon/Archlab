@@ -219,7 +219,7 @@ initial begin
         $display( "Error in #16 branch");
     end
     
-	if( error_num==0 )
+	if( err_num==0 )
 		$display( "\nPASSED ALL TESTS\n" );
 	else
 		$display( "\nFail, error number = %d\n", error_num );
