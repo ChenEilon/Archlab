@@ -7,7 +7,7 @@ module main;
   reg ok;
 
   // Correct the parameter assignment
-  fifo uut #(4, 2) (clk, reset, in, push, pop, out, full);
+  fifo #(4, 2) uut(clk, reset, in, push, pop, out, full);
 
   always #5 clk = ~clk;
   
