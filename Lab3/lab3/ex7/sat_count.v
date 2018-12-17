@@ -14,7 +14,10 @@ module sat_count(clk, reset, branch, taken, prediction);
     always@ (posedge clk,reset,branch, taken)
     begin
         if (counter >= 2**(N-1))
+        begin
             prediction = 1;
+            $display("debug2\n");
+            end
         else
             prediction = 0;
     end
@@ -34,7 +37,10 @@ module sat_count(clk, reset, branch, taken, prediction);
             else // taken == 1
             begin
                 if(counter != 2**N-1)
+                begin
                     counter = counter + 1;
+                    $display("debug1 - counter: %d\n", counter);
+                end
             end
        end
    end
