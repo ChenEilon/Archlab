@@ -32,7 +32,7 @@ module fifo(clk, reset, in, push, pop, out, full);
           for (i = 0; i < n; i = i+1)
             W[i+1] <= W[i];
           if (!pop)
-            n <= n+1
+            n <= n+1;
         end else if (pop)
           n <= n-1;
       
