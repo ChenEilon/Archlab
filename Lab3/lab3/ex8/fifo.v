@@ -20,13 +20,14 @@ module fifo(clk, reset, in, push, pop, out, full);
       n <= 0;
     
     else begin
-      if (n == 0)
+      if (n == 0) begin
         if (push) begin
           W[0] <= in;
           n <= 1;
         end
+      end
       
-      else if (n > 0 && n < N)
+      else if (n > 0 && n < N) begin
         if (push) begin
           W[0] <= in;
           for (i = 0; i < n; i = i+1)
@@ -35,21 +36,20 @@ module fifo(clk, reset, in, push, pop, out, full);
             n <= n+1;
         end else if (pop)
           n <= n-1;
+      end
       
-      else if (pop)
+      else if (pop) begin
         if (push) begin
           W[0] <= in;
           for (i = 0; i < N-1; i = i+1)
             W[i+1] <= W[i];
         end else
           n <= n-1;
+      end
     end
   end
   
   always @(n) begin
-    if (n > 0)
-      out <= W[n-1];
-    else
-      out <= 0;
+    out <= n > 0 ? W[n-1] : 0;
   end
 endmodule
