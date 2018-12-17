@@ -125,7 +125,7 @@ module main;
     in = 2'b10;
     
     #10; // W = <>
-    ok = ok && out == 2'b11 && full == 0;
+    ok = ok && out == 2'b00 && full == 0;
     
     if (ok)
       $display("PASSED ALL TESTS");
