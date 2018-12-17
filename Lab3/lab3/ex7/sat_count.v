@@ -12,7 +12,6 @@ module sat_count(clk, reset, branch, taken, prediction);
         if (counter >= 2**(N-1))
             begin
             prediction <= 1;
-            $display("debug2\n");
             end
         else
             begin
@@ -20,9 +19,8 @@ module sat_count(clk, reset, branch, taken, prediction);
             end
     end
    
-   always @(reset,branch)
+   always @(reset,branch) //assuming branch and taken signals are ready together.
    begin
-        $display("debug3 \n");
         if(reset == 1)
             begin
             counter = 0;
@@ -31,20 +29,18 @@ module sat_count(clk, reset, branch, taken, prediction);
             begin
             if(branch == 1)
                 begin
-                $display("debug4 \n");
                 if(taken == 0)
                     begin
-                    $display("debug5 \n");
                     if(counter != 0)
                         counter = counter - 1;
+                        $display("debug1 - counter: %d\n", counter);
                     end
                 else // taken == 1
                     begin
-                    $display("debug6 \n");
                     if(counter != 2**N-1)
                         begin
                         counter = counter + 1;
-                        $display("debug1 - counter: %d\n", counter);
+                        $display("debug1 + counter: %d\n", counter);
                         end
                     end
                 end
