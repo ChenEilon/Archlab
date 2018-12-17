@@ -34,11 +34,6 @@ module sat_count(clk, reset, branch, taken, prediction);
                     if(counter != 0)
                         begin
                         counter = counter - 1;
-                        $display("debug1 - counter: %d\n", counter);
-                        end
-                    else
-                        begin
-                        $display("debug1 - counter: %d\n", counter);
                         end
                     end
                 else // taken == 1
@@ -46,11 +41,6 @@ module sat_count(clk, reset, branch, taken, prediction);
                     if(counter != 2**N-1)
                         begin
                         counter = counter + 1;
-                        $display("debug1 + counter: %d\n", counter);
-                        end
-                    else
-                        begin
-                        $display("debug1 - counter: %d\n", counter);
                         end
                     end
                 end
