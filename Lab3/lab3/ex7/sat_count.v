@@ -6,11 +6,7 @@ module sat_count(clk, reset, branch, taken, prediction);
    reg[N:0] counter;
    reg prediction;
    
-   initial
-   begin
-        counter = 0;
-   end
-   
+
     always@ (posedge clk,reset,branch, taken)
     begin
         if (counter >= 2**(N-1))
