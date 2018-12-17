@@ -1,0 +1,16 @@
+ncverilog(64): 14.10-s021: (c) Copyright 1995-2015 Cadence Design Systems, Inc.
+TOOL:	ncverilog	14.10-s021: Started on Dec 17, 2018 at 19:00:00 IST
+ncverilog
+	+access+rw
+	sat_count_tb.v
+	sat_count.v
+Loading snapshot worklib.sat_count_tb:v .................... Done
+ncsim> source /home/cadence/tools/INCISIV/latest/tools/inca/files/ncsimrc
+ncsim> run
+
+PASSED ALL TESTS
+
+Simulation complete via $finish(1) at time 285 NS + 0
+./sat_count_tb.v:323 	#10 $finish;
+ncsim> exit
+TOOL:	ncverilog	14.10-s021: Exiting on Dec 17, 2018 at 19:00:00 IST  (total: 00:00:00)
