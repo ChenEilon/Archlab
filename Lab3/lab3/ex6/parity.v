@@ -22,7 +22,7 @@ module parity(clk, in, reset, out);
         one:
           state <= neg_in;
       endcase
-    end
+  end
 
   always @(state) 
   begin
