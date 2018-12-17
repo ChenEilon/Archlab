@@ -14,9 +14,6 @@ sat_count sat_count_2bit(clk, reset, branch, taken, prediction2bit);
 sat_count #(3) sat_count_5bit(clk, reset, branch, taken, prediction3bit);
 sat_count #(4) sat_count_10bit(clk, reset, branch, taken, prediction4bit);
 
-reg r,up,down,p1,p2; //TODO DEL
-test_counter tc1(r,up,down,p1);
-test_counter #(3) tc2(r,up,down,p2):
 
 initial begin
 	err_num = 0;
@@ -24,18 +21,9 @@ initial begin
 	$dumpfile("waves.vcd");
 	$dumpvars;
 
-    ///////////////////////TODO DEL
-    r = 1;
-    up = 1;
-    up = 1;
-    up = 1;
-    $display("p1: %d, p2: %d",p1,p2);
-    
-    
-    ///////////////////////
-    reset = 1;
-    reset = 0;
-    
+    reset <= 1;
+    #5
+    reset <= 0;
     #5
     
     if(prediction2bit != 0 || prediction3bit !=0 || prediction4bit != 0 )
@@ -45,9 +33,11 @@ initial begin
     end
     
     //1
-	branch = 1;
-    taken = 1;
+	taken <= 1;
     #5
+    branch <= 1;
+    #5
+
     if(prediction2bit != 0 || prediction3bit != 0 || prediction4bit != 0 )
     begin
         err_num = err_num + 1;
@@ -55,11 +45,15 @@ initial begin
         $display("prediction2bit: %d (0),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch <= 0;
+    #5
     
     //2
-	branch = 1;
-    taken = 1;
+	taken <= 1;
     #5
+    branch <= 1;
+    #5
+    
     if(prediction2bit != 1 || prediction3bit != 0 || prediction4bit != 0 )
     begin
         err_num = err_num + 1;
@@ -67,10 +61,16 @@ initial begin
         $display("prediction2bit: %d (1),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
-    //3
-	branch = 1;
-    taken = 1;
+    branch <= 0;
     #5
+
+    
+    //3
+    taken <= 1;
+    #5
+	branch <= 1;
+    #5
+    
     if(prediction2bit != 1 || prediction3bit != 0 || prediction4bit != 0 )
     begin
         err_num = err_num + 1;
@@ -78,10 +78,16 @@ initial begin
         $display("prediction2bit: %d (1),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
-    //4
-	branch = 1;
-    taken = 1;
+    branch <= 0;
     #5
+
+    
+    //4
+    taken <= 1;
+    #5
+	branch <= 1;
+    #5
+    
     if(prediction2bit != 1 || prediction3bit != 1 || prediction4bit != 0 )
     begin
         err_num = err_num + 1;
@@ -89,10 +95,16 @@ initial begin
         $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
-    //5
-	branch = 1;
-    taken = 1;
+    branch <= 0;
     #5
+
+    
+    //5
+    taken <= 1;
+    #5
+	branch <= 1;
+    #5
+    
     if(prediction2bit != 1 || prediction3bit !=1 || prediction4bit != 0 )
     begin
         err_num = err_num + 1;
@@ -100,9 +112,14 @@ initial begin
         $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch <= 0;
+    #5
+
+    
     //6
-	branch = 1;
-    taken = 1;
+	taken <= 1;
+    #5
+	branch <= 1;
     #5
     if(prediction2bit != 1 || prediction3bit != 1 || prediction4bit != 0 )
     begin
@@ -111,9 +128,14 @@ initial begin
         $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch <= 0;
+    #5
+
+    
     //7
-	branch = 1;
-    taken = 0;
+    taken <= 0;
+    #5
+	branch <= 1;
     #5
     if(prediction2bit != 1 || prediction3bit != 1 || prediction4bit != 0 )
     begin
@@ -121,10 +143,12 @@ initial begin
         $display( "Error in #7 branch");
         $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
-    
+    branch <= 0;
+    #5
     //8
-	branch = 1;
-    taken = 0;
+	taken <= 0;
+    #5
+	branch <= 1;
     #5
     if(prediction2bit != 0 || prediction3bit != 1 || prediction4bit != 0 )
     begin
@@ -132,10 +156,13 @@ initial begin
         $display( "Error in #8 branch");
         $display("prediction2bit: %d (0),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
+    branch <= 0;
+    #5
     
     //9
-	branch = 1;
-    taken = 0;
+    taken <= 0;
+    #5
+	branch <= 1;
     #5
     if(prediction2bit != 0 || prediction3bit != 0 || prediction4bit != 0 )
     begin
@@ -144,9 +171,13 @@ initial begin
         $display("prediction2bit: %d (0),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch <= 0;
+    #5
+    
     //10
-	branch = 1;
-    taken = 1;
+    taken <= 1;
+    #5
+	branch <= 1;
     #5
     if(prediction2bit != 0 || prediction3bit != 1 || prediction4bit != 0 )
     begin
@@ -155,10 +186,14 @@ initial begin
         $display("prediction2bit: %d (0),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch<=0;
+    #5
+    
     //11
-	branch = 1;
+    taken <= 1;
     tmp = prediction2bit;
-    taken = 1;
+    #5
+    branch <= 1;
     #5
     if(prediction2bit != 1 || prediction3bit != 1 || prediction4bit != 0 )
     begin
@@ -173,9 +208,13 @@ initial begin
         $display( "Error in #11 branch - update timing");
     end
     
+    branch<=0;
+    #5
+    
     //12
-	branch = 0;
-    taken = 0;
+    taken <= 0;
+    #5
+	branch <= 0;
     #5
     if(prediction2bit != 1 || prediction3bit != 1 || prediction4bit != 0 )
     begin
@@ -184,9 +223,13 @@ initial begin
         $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch<=0;
+    #5
+    
     //13
-	branch = 0;
-    taken = 0;
+	taken <= 0;
+    #5
+	branch <= 0;
     #5
     if(prediction2bit != 1 || prediction3bit != 1 || prediction4bit != 0 )
     begin
@@ -195,8 +238,11 @@ initial begin
         $display("prediction2bit: %d (01),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch<=0;
+    #5
+    
     //14
-    taken = 1;
+    taken <= 1;
     #5
     if(prediction2bit != 1 || prediction3bit != 1 || prediction4bit != 0 )
     begin
@@ -205,8 +251,11 @@ initial begin
         $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch<=0;
+    #5
+    
     //15
-	reset = 1;
+	reset <= 1;
     #5
     if(prediction2bit != 0 || prediction3bit != 0 || prediction4bit != 0 )
     begin
@@ -215,9 +264,13 @@ initial begin
         $display("prediction2bit: %d (0),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch<=0;
+    #5
+    
     //16
-	branch = 1;
-    taken = 1;
+	taken <= 1;
+    #5
+	branch <= 1;
     #5
     if(prediction2bit != 0 || prediction3bit != 0 || prediction4bit != 0 )
     begin
@@ -226,9 +279,13 @@ initial begin
         $display("prediction2bit: %d (0),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch<=0;
+    #5
+    
     //17
-	branch = 1;
-    taken = 1;
+	taken <= 1;
+    #5
+	branch <= 1;
     #5
     if(prediction2bit != 1 || prediction3bit != 0 || prediction4bit != 0 )
     begin
@@ -237,9 +294,13 @@ initial begin
         $display("prediction2bit: %d (1),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    branch<=0;
+    #5
+    
     //18
-	branch = 1;
-    taken = 1;
+	taken <= 1;
+    #5
+	branch <= 1;
     #5
     if(prediction2bit != 1 || prediction3bit != 0 || prediction4bit != 0 )
     begin
@@ -247,6 +308,10 @@ initial begin
         $display( "Error in #18 branch");
         $display("prediction2bit: %d (1),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
+    
+    branch<=0;
+    #5
+    
     
 	if( err_num==0 )
 		$display( "\nPASSED ALL TESTS\n" );
