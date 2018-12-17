@@ -12,7 +12,7 @@ module main;
   always #5 clk = ~clk;
   
   always @(negedge clk) begin
-    $display("time %d: reset %b, push %b, pop %b, in %b, out %b", $time, reset, push, pop, in, out);
+    $display("time %d: reset %b, push %b, pop %b, in %b, out %b, full %b", $time, reset, push, pop, in, out, full);
   end
 
   initial begin
@@ -129,6 +129,6 @@ module main;
     if (ok)
       $display("PASSED ALL TESTS");
     
-    $finish
+    $finish;
   end
 endmodule
