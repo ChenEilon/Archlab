@@ -10,10 +10,17 @@ module fifo(clk, reset, in, push, pop, out, full);
   reg [M-1:0] out;
   reg [M-1:0] W [N-1:0];
   reg [31:0] n;
+  reg [31:0] n_next;
+  reg [31:0] n_prev;
   integer i;
   
   assign full = n == N;
 
+  always @(*) begin
+    n_next = n+1;
+    n_prev = n-1;
+  end
+  
   always @(posedge clk)
   begin
     if (reset)
@@ -32,9 +39,9 @@ module fifo(clk, reset, in, push, pop, out, full);
           for (i = 0; i < n; i = i+1)
             W[i+1] <= W[i];
           if (!pop)
-            n <= n+1;
+            n <= n_next;
         end else if (pop)
-          n <= n-1;
+          n <= n_prev;
       
       else if (pop)
         if (push) begin
@@ -42,14 +49,11 @@ module fifo(clk, reset, in, push, pop, out, full);
           for (i = 0; i < N-1; i = i+1)
             W[i+1] <= W[i];
         end else
-          n <= n-1;
+          n <= n_prev;
     end
   end
   
   always @(n) begin
-    if (n > 0)
-      out <= W[n-1];
-    else
-      out <= 0;
+    out <= n > 0 ? W[n_prev] : 0;
   end
 endmodule
