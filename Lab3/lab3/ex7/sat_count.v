@@ -3,7 +3,7 @@ module sat_count(clk, reset, branch, taken, prediction);
    input clk, reset, branch, taken;
    output prediction;
    
-   reg[N:0] counter;
+   reg[N-1:0] counter;
    reg prediction;
    
 
@@ -22,7 +22,7 @@ module sat_count(clk, reset, branch, taken, prediction);
    begin
         $display("debug3 \n");
         if(reset == 1)
-            counter = 0;
+            counter = N'd0;
         else if(branch == 1)
             begin
             $display("debug4 \n");

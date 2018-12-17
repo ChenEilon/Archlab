@@ -14,12 +14,25 @@ sat_count sat_count_2bit(clk, reset, branch, taken, prediction2bit);
 sat_count #(3) sat_count_5bit(clk, reset, branch, taken, prediction3bit);
 sat_count #(4) sat_count_10bit(clk, reset, branch, taken, prediction4bit);
 
+reg r,up,down,p1,p2; //TODO DEL
+test_counter tc1(r,up,down,p1);
+test_counter #(3) tc2(r,up,down,p2):
+
 initial begin
 	err_num = 0;
 
 	$dumpfile("waves.vcd");
 	$dumpvars;
 
+    ///////////////////////TODO DEL
+    r = 1;
+    up = 1;
+    up = 1;
+    up = 1;
+    $display("p1: %d, p2: %d",p1,p2);
+    
+    
+    ///////////////////////
     reset = 1;
     reset = 0;
     
