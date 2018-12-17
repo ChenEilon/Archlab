@@ -47,7 +47,9 @@ module fifo(clk, reset, in, push, pop, out, full);
           n <= n-1;
       end
     end
+  end
   
+  always @(n or W[n-1]) begin
     out <= n > 0 ? W[n-1] : 0;
   end
 endmodule
