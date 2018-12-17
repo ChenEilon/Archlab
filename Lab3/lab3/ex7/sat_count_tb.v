@@ -40,7 +40,8 @@ initial begin
     if(prediction2bit != 0 || prediction3bit != 0 || prediction4bit != 0 )
     begin
         err_num = err_num + 1;
-        $display( "Error in #1 branch");
+        $display("Error in #1 branch\n");
+        $display("prediction2bit: %d (0),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     
@@ -52,6 +53,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #2 branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //3
@@ -62,6 +64,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #3 branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //4
@@ -72,6 +75,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #4 branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //5
@@ -82,6 +86,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #5 branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //6
@@ -92,6 +97,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #6 branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //7
@@ -102,6 +108,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #7 branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //8
@@ -112,6 +119,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #8 branch");
+        $display("prediction2bit: %d (0),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //9
@@ -122,6 +130,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #9 branch");
+        $display("prediction2bit: %d (0),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //10
@@ -132,6 +141,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #10 branch");
+        $display("prediction2bit: %d (0),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //11
@@ -143,6 +153,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #11 branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     if (tmp == prediction2bit)
@@ -159,6 +170,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #12 (no) branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //13
@@ -169,6 +181,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #13 (no) branch");
+        $display("prediction2bit: %d (01),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //14
@@ -178,6 +191,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #14 (no) branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(1), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //15
@@ -187,6 +201,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #15 reset");
+        $display("prediction2bit: %d (0),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //16
@@ -197,6 +212,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #16 branch");
+        $display("prediction2bit: %d (0),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //17
@@ -207,6 +223,7 @@ initial begin
     begin
         err_num = err_num + 1;
         $display( "Error in #17 branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
     //18
@@ -216,7 +233,8 @@ initial begin
     if(prediction2bit != 1 || prediction3bit != 0 || prediction4bit != 0 )
     begin
         err_num = err_num + 1;
-        $display( "Error in #16 branch");
+        $display( "Error in #18 branch");
+        $display("prediction2bit: %d (1),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
 	if( err_num==0 )
