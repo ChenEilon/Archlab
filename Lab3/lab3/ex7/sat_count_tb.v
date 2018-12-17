@@ -264,6 +264,8 @@ initial begin
         $display("prediction2bit: %d (0),prediction3bit: %d(0), prediction4bit %d(0)\n",prediction2bit,prediction3bit,prediction4bit);
     end
     
+    reset <= 0;
+    #5
     branch<=0;
     #5
     
