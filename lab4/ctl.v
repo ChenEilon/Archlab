@@ -190,9 +190,9 @@ module CTL(
 				5: readReg = r5;
 				6: readReg = r6;
 				7: readReg = r7;
-			endcase;
+			endcase
 		end
-	endfunction;
+	endfunction
 	
 	task writeReg;
 		input d, v;
@@ -204,9 +204,9 @@ module CTL(
 				5: r5 <= v;
 				6: r6 <= v;
 				7: r7 <= v;
-			endcase;
+			endcase
 		end
-	endtask;
+	endtask
 	
 endmodule // CTL
 
