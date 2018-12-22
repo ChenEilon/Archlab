@@ -13,18 +13,18 @@ module ALU(opcode, alu0, alu1, aluout);
    always@(alu0 or alu1 or opcode)
      begin
 	case (opcode)
-	  `ADD:  aluout <= alu0 + alu1;
-	  `SUB:	aluout <= alu0 - alu1;
-	  `LSF:	aluout <= alu0 << alu1;
-	  `RSF:	aluout <= alu0 >>> alu1;
-	  `AND:	aluout <= alu0 & alu1;
-	  `OR:	aluout <= alu0 | alu1;
-	  `XOR:	aluout <= alu0 ^ alu1;
-	  `LHI:	aluout <=  (alu1 << 16) | alu0[15:0];
-	  `JLT:	aluout <= (alu0 < alu1);
-	  `JLE:	aluout <= (alu0 <= alu1);
-	  `JEQ:	aluout <= (alu0 == alu1);
-	  `JNE:	aluout <= (alu0 != alu1);
+		`ADD:	aluout <= alu0 + alu1;
+		`SUB:	aluout <= alu0 - alu1;
+		`LSF:	aluout <= alu0 << alu1;
+		`RSF:	aluout <= alu0 >>> alu1;
+		`AND:	aluout <= alu0 & alu1;
+		`OR:	aluout <= alu0 | alu1;
+		`XOR:	aluout <= alu0 ^ alu1;
+		`LHI:	aluout <= (alu1 << 16) | alu0[15:0];
+		`JLT:	aluout <= (alu0 < alu1);
+		`JLE:	aluout <= (alu0 <= alu1);
+		`JEQ:	aluout <= (alu0 == alu1);
+		`JNE:	aluout <= (alu0 != alu1);
 
 	endcase
      end

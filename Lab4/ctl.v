@@ -56,6 +56,8 @@ module CTL(
 
    integer 	 verilog_trace_fp, rc;
    
+   wire pc_next [15:0] = pc + 1;
+   
    initial
      begin
 	verilog_trace_fp = $fopen("verilog_trace.txt", "w");
@@ -154,22 +156,22 @@ module CTL(
 		  `CTL_STATE_EXEC1: begin
 			if (opcode >= `AND && opcode <= `LHI) begin
 				writeReg (dst, aluout);
-				pc <= pc + 1;
+				pc <= pc_next;
 			end else if (opcode == `LD) begin
 				writeReg (dst, sram_DO);
-				pc <= pc + 1;
+				pc <= pc_next;
 			end else if (opcode == `ST) begin
-				pc <= pc + 1;
+				pc <= pc_next;
 			end else if (opcode >= `JLT && opcode <= `JNE) begin
 				if (aluout) begin
-					pc <= immediate;
 					writeReg (7, pc);
+					pc <= immediate;
 				end else begin
-					pc <= pc + 1;
+					pc <= pc_next;
 				end
 			end else if (opcode == `JIN) begin
-				pc <= alu0;
 				writeReg (7, pc);
+				pc <= alu0;
 			end
 			ctl_state <= `CTL_STATE_FETCH0;
 		  end
