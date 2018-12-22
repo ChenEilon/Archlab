@@ -178,7 +178,7 @@ module CTL(
 	end // !reset
      end // @posedge(clk)
 	
-	function readReg;
+	function [31:0] readReg;
 	    input [2:1] d;
 		begin
 			case (d)
