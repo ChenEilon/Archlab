@@ -160,8 +160,6 @@ module CTL(
 					end else if (opcode == `LD) begin
 						writeReg (dst, sram_DO);
 						pc <= pc_next;
-					end else if (opcode == `ST) begin
-						pc <= pc_next;
 					end else if (opcode >= `JLT && opcode <= `JNE) begin
 						if (aluout) begin
 							writeReg (7, pc);
@@ -176,6 +174,8 @@ module CTL(
 						$fclose(verilog_trace_fp);
 						$writememh("verilog_sram_out.txt", top.SP.SRAM.mem);
 						$finish;
+					end else begin
+						pc <= pc_next;
 					end
 					ctl_state <= `CTL_STATE_FETCH0;
 				end
