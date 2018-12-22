@@ -179,7 +179,7 @@ module CTL(
      end // @posedge(clk)
 	
 	function readReg;
-	    input d;
+	    input [2:1] d;
 		begin
 			case (d)
 				0: readReg = 0;
@@ -195,7 +195,8 @@ module CTL(
 	endfunction
 	
 	task writeReg;
-		input d, v;
+		input [2:1] d;
+        input [31:0] v;
 		begin
 			case (d)
 				2: r2 <= v;
