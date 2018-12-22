@@ -1,9 +1,6 @@
-`include "sp.v"
-
 /***********************************
  * TOP module
  **********************************/
-
 module top;
 
    reg clk, reset, start;
