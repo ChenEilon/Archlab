@@ -152,18 +152,24 @@ module CTL(
 			ctl_state <= `CTL_STATE_EXEC1;
 		  end
 		  `CTL_STATE_EXEC1: begin
-		    if (opcode >= `AND && opcode <= `LHI) begin
-			  writeReg (dst, aluout);
+			if (opcode >= `AND && opcode <= `LHI) begin
+				writeReg (dst, aluout);
+				pc <= pc + 1;
 			end else if (opcode == `LD) begin
-			  writeReg (dst, sram_DO);
+				writeReg (dst, sram_DO);
+				pc <= pc + 1;
+			end else if (opcode == `ST) begin
+				pc <= pc + 1;
 			end else if (opcode >= `JLT && opcode <= `JNE) begin
-			  if (aluout) begin
-			    pc <= immediate;
-				writeReg (7, pc);
-			  end
+				if (aluout) begin
+					pc <= immediate;
+					writeReg (7, pc);
+				end else begin
+					pc <= pc + 1;
+				end
 			end else if (opcode == `JIN) begin
-			  pc <= alu0;
-			  writeReg (7, pc);
+				pc <= alu0;
+				writeReg (7, pc);
 			end
 			ctl_state <= `CTL_STATE_FETCH0;
 		  end
