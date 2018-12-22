@@ -56,7 +56,7 @@ module CTL(
 
    integer 	 verilog_trace_fp, rc;
    
-   wire pc_next [15:0] = pc + 1;
+   wire [15:0] pc_next = pc + 1;
    
    initial
      begin
