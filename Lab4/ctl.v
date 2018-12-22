@@ -151,6 +151,7 @@ module CTL(
 			ctl_state <= `CTL_STATE_EXEC0;
 		  end
 		  `CTL_STATE_EXEC0: begin
+			aluout <= aluout_wire;
 			ctl_state <= `CTL_STATE_EXEC1;
 		  end
 		  `CTL_STATE_EXEC1: begin
