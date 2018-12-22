@@ -16,12 +16,9 @@ module SP(clk, reset, start);
    wire [31:0] alu0;
    wire [31:0] alu1;
    wire [31:0] aluout_wire;
-   
-   reg [31:0] aluout;
-   assign aluout_wire = aluout;
 
    // instantiate ALU, CTL and SRAM modules
-   ALU ALU(opcode, alu0, alu1, aluout);
+   ALU ALU(opcode, alu0, alu1, aluout_wire);
    CTL CTL(
 	   clk,
 	   reset,
