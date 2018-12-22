@@ -139,7 +139,7 @@ module CTL(
 		  end
 		  `CTL_STATE_DEC1: begin
 			//sp_trace_inst(spro);
-			if (opcode == LHI) begin
+			if (opcode == `LHI) begin
 			  alu0 <= readReg (dst);
 			  alu1 <= immediate;
 			end else begin
