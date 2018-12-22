@@ -155,7 +155,7 @@ module CTL(
 			ctl_state <= `CTL_STATE_EXEC1;
 		  end
 		  `CTL_STATE_EXEC1: begin
-			if (opcode >= `AND && opcode <= `LHI) begin
+			if (opcode >= `ADD && opcode <= `LHI) begin
 				writeReg (dst, aluout);
 				pc <= pc_next;
 			end else if (opcode == `LD) begin
