@@ -240,9 +240,9 @@ module CTL(
 						dma_dst <= dma_dst + 1;
 						dma_counter <= dma_counter - 1;
 						if (dma_counter == 1) begin
-							dma_state <= `DMA_STATE_IDLE
+							dma_state <= `DMA_STATE_IDLE;
 						end else begin
-							dma_state <= `DMA_STATE_READ
+							dma_state <= `DMA_STATE_READ;
 						end
 					end
 				end
