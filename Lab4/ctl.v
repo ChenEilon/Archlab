@@ -139,10 +139,9 @@ module CTL(
 					ctl_state <= `CTL_STATE_DEC1;
 				end
 				`CTL_STATE_DEC1: begin
-					//sp_trace_inst(spro);
 					if (opcode == `LHI) begin
-					  alu0 <= readReg (dst);
-					  alu1 <= immediate;
+						alu0 <= readReg (dst);
+						alu1 <= immediate;
 					end else begin
 						alu0 <= readReg (src0);
 						alu1 <= readReg (src1);
@@ -154,29 +153,36 @@ module CTL(
 					ctl_state <= `CTL_STATE_EXEC1;
 				end
 				`CTL_STATE_EXEC1: begin
-					if (opcode >= `ADD && opcode <= `LHI) begin
-						writeReg (dst, aluout);
-						pc <= pc_next;
-					end else if (opcode == `LD) begin
-						writeReg (dst, sram_DO);
-						pc <= pc_next;
-					end else if (opcode >= `JLT && opcode <= `JNE) begin
-						if (aluout) begin
-							writeReg (7, pc);
-							pc <= immediate;
-						end else begin
+					case (opcode) begin
+						`ADD, `SUB, `LSF, `RSF, `AND, `OR, `XOR, `LHI: begin
+							writeReg (dst, aluout);
 							pc <= pc_next;
 						end
-					end else if (opcode == `JIN) begin
-						writeReg (7, pc);
-						pc <= alu0;
-					end else if (opcode == `HLT) begin
-						$fclose(verilog_trace_fp);
-						$writememh("verilog_sram_out.txt", top.SP.SRAM.mem);
-						$finish;
-					end else begin
-						pc <= pc_next;
-					end
+						`LD: begin
+							writeReg (dst, sram_DO);
+							pc <= pc_next;
+						end
+						`JLT, `JLE, `JEQ, `JNE, `JNE: begin
+							if (aluout) begin
+								writeReg (7, pc);
+								pc <= immediate;
+							end else begin
+								pc <= pc_next;
+							end
+						end
+						`JIN: begin
+							writeReg (7, pc);
+							pc <= alu0;
+						end
+						`HLT: begin
+							$fclose(verilog_trace_fp);
+							$writememh("verilog_sram_out.txt", top.SP.SRAM.mem);
+							$finish;
+						end
+						default: begin
+							pc <= pc_next;
+						end
+					endcase
 					ctl_state <= `CTL_STATE_FETCH0;
 				end
 			endcase

@@ -24,7 +24,7 @@ module ALU(opcode, alu0, alu1, aluout);
 		`JLT:	aluout <= (alu0 < alu1);
 		`JLE:	aluout <= (alu0 <= alu1);
 		`JEQ:	aluout <= (alu0 == alu1);
-		`JNE:	aluout <= (alu0 != alu1);
+		`JNE, `POL:	aluout <= (alu0 != alu1);
 
 	endcase
      end
