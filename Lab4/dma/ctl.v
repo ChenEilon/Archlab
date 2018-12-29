@@ -53,21 +53,41 @@ module CTL(
    reg [31:0] 	 immediate;
    reg [31:0] 	 cycle_counter;
    reg [2:0] 	 ctl_state;
+   reg [1:0] 	 dma_state;
+   reg [15:0] 	 dma_src;
+   reg [15:0] 	 dma_dst;
+   reg [15:0] 	 dma_counter;
+   reg [31:0] 	 dma_reg;
 
    integer 	 verilog_trace_fp, rc;
    
-   wire [15:0] pc_next = pc + 1;
+	wire [15:0] pc_next = pc + 1;
+	wire dma_read_flag = dma_state == `DMA_STATE_READ
+						 && (ctl_state == `CTL_STATE_DEC0
+						 || (ctl_state == `CTL_STATE_DEC1 && opcode != `LD)
+						 || (ctl_state == `CTL_STATE_EXEC0 && opcode != `LD && opcode != `ST));
+	wire dma_write_flag = dma_state == `DMA_STATE_WRITE
+						 && (ctl_state == `CTL_STATE_DEC0
+						 || ctl_state == `CTL_STATE_DEC1
+						 || (ctl_state == `CTL_STATE_EXEC0 && opcode != `LD)
+						 || (ctl_state == `CTL_STATE_EXEC1 && opcode != `LD && opcode != `ST));
    
    initial
      begin
 	verilog_trace_fp = $fopen("verilog_trace.txt", "w");
      end
 
-	 
-	assign sram_DI = alu0;
-	assign sram_ADDR = (ctl_state == `CTL_STATE_FETCH0) ? pc : alu1;
+	
+	assign sram_DI = dma_write_flag ? dma_reg : alu0;
+	assign sram_ADDR = dma_read_flag ?
+					   dma_src :
+					   dma_write_flag ?
+					   dma_dst :
+					   ctl_state == `CTL_STATE_FETCH0 ?
+					   pc :
+					   alu1;
 	assign sram_EN = 1;
-	assign sram_WE = (ctl_state == `CTL_STATE_EXEC1 && opcode == `ST) ? 1 : 0;
+	assign sram_WE = dma_write_flag || (ctl_state == `CTL_STATE_EXEC1 && opcode == `ST) ? 1 : 0;
 
    
 	// synchronous instructions
@@ -178,6 +198,26 @@ module CTL(
 						pc <= pc_next;
 					end
 					ctl_state <= `CTL_STATE_FETCH0;
+				end
+			endcase
+			
+			case (dma_state)
+				`DMA_STATE_IDLE: begin
+					if (dma_counter) begin
+						dma_state <= `DMA_STATE_READ;
+					end
+				end
+				`DMA_STATE_READ: begin
+					if (dma_read_flag) begin
+						dma_state <= `DMA_STATE_EXTRACT;
+					end
+				end
+				`DMA_STATE_EXTRACT: begin
+					dma_reg <= sram_DO;
+					dma_state <= `DMA_STATE_WRITE;
+				end
+				`DMA_STATE_WRITE: begin
+					
 				end
 			endcase
 		end // !reset
