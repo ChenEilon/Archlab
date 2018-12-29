@@ -185,7 +185,7 @@ module CTL(
 					ctl_state <= `CTL_STATE_EXEC1;
 				end
 				`CTL_STATE_EXEC1: begin
-					case (opcode) begin
+					case (opcode)
 						`ADD, `SUB, `LSF, `RSF, `AND, `OR, `XOR, `LHI: begin
 							writeReg (dst, aluout);
 							pc <= pc_next;
