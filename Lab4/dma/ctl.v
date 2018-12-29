@@ -217,7 +217,16 @@ module CTL(
 					dma_state <= `DMA_STATE_WRITE;
 				end
 				`DMA_STATE_WRITE: begin
-					
+					if (dma_write_flag) begin
+						dma_src <= dma_src + 1;
+						dma_dst <= dma_dst + 1;
+						dma_counter <= dma_counter - 1;
+						if (dma_counter == 1) begin
+							dma_state <= `DMA_STATE_IDLE
+						end else begin
+							dma_state <= `DMA_STATE_READ
+						end
+					end
 				end
 			endcase
 		end // !reset
