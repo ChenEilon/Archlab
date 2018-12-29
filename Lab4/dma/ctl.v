@@ -113,6 +113,11 @@ module CTL(
 			immediate <= 0;
 			cycle_counter <= 0;
 			ctl_state <= 0;
+			dma_state <= 0;
+			dma_src <= 0;
+			dma_dst <= 0;
+			dma_counter <= 0;
+			dma_reg <= 0;
 		end else begin
 			// generate cycle trace
 			$fdisplay(verilog_trace_fp, "cycle %0d", cycle_counter);
@@ -133,11 +138,11 @@ module CTL(
 			$fdisplay(verilog_trace_fp, "alu1 %08x", alu1);
 			$fdisplay(verilog_trace_fp, "aluout %08x", aluout);
 			$fdisplay(verilog_trace_fp, "cycle_counter %08x", cycle_counter);
-			$fdisplay(verilog_trace_fp, "ctl_state %08x\n", ctl_state);
-			$fdisplay(verilog_trace_fp, "dma_state %08x\n", dma_state);
-			$fdisplay(verilog_trace_fp, "dma_src %08x\n", dma_src);
-			$fdisplay(verilog_trace_fp, "dma_dst %08x\n", dma_dst);
-			$fdisplay(verilog_trace_fp, "dma_counter %08x\n", dma_counter);
+			$fdisplay(verilog_trace_fp, "ctl_state %08x", ctl_state);
+			$fdisplay(verilog_trace_fp, "dma_state %08x", dma_state);
+			$fdisplay(verilog_trace_fp, "dma_src %08x", dma_src);
+			$fdisplay(verilog_trace_fp, "dma_dst %08x", dma_dst);
+			$fdisplay(verilog_trace_fp, "dma_counter %08x", dma_counter);
 			$fdisplay(verilog_trace_fp, "dma_reg %08x\n", dma_reg);
 
 			cycle_counter <= cycle_counter + 1;
