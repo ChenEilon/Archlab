@@ -1,0 +1,24 @@
+t = 640ns:
+The control is in state FETCH0. The DMA is in state READ.
+sram_ADDR is set to pc since the control's transaction is prioritized.
+The DMA will remain in state READ until the control's transaction is done.
+
+t = 660ns:
+Now that the control is in state DEC0, it's safe for the DMA to initiate a read transaction.
+sram_ADDR is set to dma_src.
+
+t = 670ns:
+The DMA is in state EXTRACT.
+
+t = 680ns:
+The DMA is in state WRITE and dma_reg is set to sram_DO.
+The control is in state EXEC0 and the opcode is LD, so the DMA will remain in state WRITE until the control's transactions are done.
+
+t = 720ns:
+Now that the control is again in state DEC0, it's safe for the DMA to initiate a write transaction.
+sram_ADDR is set to dma_dst.
+sram_WE is set.
+sram_DI is set to dma_reg.
+
+t = 730ns, 740ns, 750ns:
+These cycles are hazard free, so we can see a full cycle of the DMA state machine.
