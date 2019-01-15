@@ -227,15 +227,14 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 			break;
 	}
 
+	sprn->dec1_pred = spro->dec0_pred;
+
 	sprn->dec1_inst = spro->dec0_inst;
 	sprn->dec1_opcode = dec0_opcode_current;
 	sprn->dec1_dst = dec0_dst_current;
 	sprn->dec1_src0 = sbs(spro->dec0_inst, 21, 19);
 	sprn->dec1_src1 = sbs(spro->dec0_inst, 18, 16);
 	sprn->dec1_immediate = ssbs(spro->dec0_inst, 15, 0);
-
-	sprn->dec1_pred = spro->dec0_pred;
-
 	sprn->dec1_pc = spro->dec0_pc;
 	sprn->dec1_active = 1;
 }
@@ -250,15 +249,14 @@ static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
 		sprn->exec0_alu1 = sp_reg_value(spro, spro->dec1_src1);
 	}
 
+	sprn->exec0_pred = spro->dec1_pred;
+
 	sprn->exec0_inst = spro->dec1_inst;
 	sprn->exec0_opcode = spro->dec1_opcode;
 	sprn->exec0_dst = spro->dec1_dst;
 	sprn->exec0_src0 = spro->dec1_src0;
 	sprn->exec0_src1 = spro->dec1_src1;
 	sprn->exec0_immediate = spro->dec1_immediate;
-
-	sprn->exec0_pred = spro->dec1_pred;
-
 	sprn->exec0_pc = spro->dec1_pc;
 	sprn->exec0_active = 1;
 }
