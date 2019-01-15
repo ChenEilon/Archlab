@@ -155,6 +155,26 @@ static int sp_reg_value(sp_registers_t *spro, int reg_num)
 }
 
 
+static int sp_get_pred(sp_t *sp) {
+	return sp->spro->pred >= 2;
+}
+
+
+static void sp_set_pred(sp_t *sp, int taken) {
+	switch (sp->spro->pred) {
+		case 0:
+			sp->sprn->pred = sp->spro->pred + !!taken;
+		case 1:
+		case 2:
+			sp->sprn->pred = sp->spro->pred + 2*!!taken - 1;
+		case 3:
+			sp->sprn->pred = sp->spro->pred - !taken;
+		default:
+			sp->sprn->pred = 0;
+	}
+}
+
+
 static void sp_fetch0(sp_t *sp) {
 	llsim_mem_read(sp->srami, sp->spro->fetch0_pc);
 	sp->sprn->fetch1_pc = sp->spro->fetch0_pc;
@@ -200,6 +220,7 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
     sprn->dec1_active = 1;
 }
 
+
 static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
 	if (spro->opcode == LHI) {
 		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_dst);
@@ -219,13 +240,16 @@ static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
     sprn->exec0_active = 1;
 }
 
+
 static void sp_exec0(sp_registers_t *spro, sp_registers_t *sprn) {
 	
 }
 
+
 static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
 	
 }
+
 
 static void sp_ctl(sp_t *sp)
 {
