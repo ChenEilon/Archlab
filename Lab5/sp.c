@@ -136,6 +136,30 @@ static void dump_sram(sp_t *sp, char *name, llsim_memory_t *sram)
 	fclose(fp);
 }
 
+static void sp_fetch0(sp_registers_t *spro, sp_registers_t *sprn) {
+	
+}
+
+static void sp_fetch1(sp_registers_t *spro, sp_registers_t *sprn) {
+	
+}
+
+static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
+	
+}
+
+static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
+	
+}
+
+static void sp_exec0(sp_registers_t *spro, sp_registers_t *sprn) {
+	
+}
+
+static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
+	
+}
+
 static void sp_ctl(sp_t *sp)
 {
 	sp_registers_t *spro = sp->spro;
@@ -207,23 +231,36 @@ static void sp_ctl(sp_t *sp)
 	// fetch0
 	sprn->fetch1_active = 0;
 	if (spro->fetch0_active) {
+		sp_fetch0(spro, sprn);
 	}
 
 	// fetch1
-	// FILL HERE
-	
+	sprn->dec0_active = 0;
+	if (spro->fetch1_active) {
+		sp_fetch1(spro, sprn);
+	}
+
 	// dec0
-	// FILL HERE
+	sprn->dec1_active = 0;
+	if (spro->dec0_active) {
+		sp_dec0(spro, sprn);
+	}
 
 	// dec1
-	// FILL HERE
+	sprn->exec0_active = 0;
+	if (spro->dec1_active) {
+		sp_dec1(spro, sprn);
+	}
 
 	// exec0
-	// FILL HERE
+	sprn->exec1_active = 0;
+	if (spro->exec0_active) {
+		sp_exec0(spro, sprn);
+	}
 
 	// exec1
 	if (spro->exec1_active) {
-		// FILL HERE
+		sp_exec1(spro, sprn);
 		if (spro->exec1_opcode == HLT) {
 			llsim_stop();
 			dump_sram(sp, "srami_out.txt", sp->srami);
