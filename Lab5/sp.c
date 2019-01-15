@@ -74,6 +74,9 @@ typedef struct sp_registers_s {
     
     // stalls
     int stall; // 3 bit
+	
+	// branch prediction
+	int pred; // 2 bit
 } sp_registers_t;
 
 /*
