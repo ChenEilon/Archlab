@@ -71,6 +71,9 @@ typedef struct sp_registers_s {
 	int exec1_alu0; // 32 bits
 	int exec1_alu1; // 32 bits
 	int exec1_aluout;
+    
+    // stalls
+    int stall; // 3 bit
 } sp_registers_t;
 
 /*
@@ -141,7 +144,7 @@ static void sp_fetch0(sp_registers_t *spro, sp_registers_t *sprn) {
 }
 
 static void sp_fetch1(sp_registers_t *spro, sp_registers_t *sprn) {
-	
+	//sprn->inst = llsim_mem_extract_dataout(sp->sram, 31, 0);
 }
 
 static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
@@ -213,6 +216,8 @@ static void sp_ctl(sp_t *sp)
 	fprintf(cycle_trace_fp, "exec1_alu1 %08x\n", spro->exec1_alu1); // 32 bits
 	fprintf(cycle_trace_fp, "exec1_aluout %08x\n", spro->exec1_aluout);
 
+	fprintf(cycle_trace_fp, "stall %08x\n", spro->stall);
+
 	fprintf(cycle_trace_fp, "\n");
 
 	sp_printf("cycle_counter %08x\n", spro->cycle_counter);
@@ -227,6 +232,10 @@ static void sp_ctl(sp_t *sp)
 
 	if (sp->start)
 		sprn->fetch0_active = 1;
+    
+    // stall handling
+    if(spro->stall)
+        sprn->stall = spro->stall - 1;
 
 	// fetch0
 	sprn->fetch1_active = 0;
