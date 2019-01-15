@@ -164,11 +164,14 @@ static void sp_set_pred(sp_t *sp, int taken) {
 	switch (sp->spro->pred) {
 		case 0:
 			sp->sprn->pred = sp->spro->pred + !!taken;
+			break;
 		case 1:
 		case 2:
 			sp->sprn->pred = sp->spro->pred + 2*!!taken - 1;
+			break;
 		case 3:
 			sp->sprn->pred = sp->spro->pred - !taken;
+			break;
 		default:
 			sp->sprn->pred = 0;
 	}
@@ -192,32 +195,32 @@ static void sp_fetch1(sp_t *sp) {
 static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 	int dec0_opcode_current = sbs(spro->dec0_inst, 29, 25);
 	int dec0_dst_current = sbs(spro->dec0_inst, 24, 22);
+	int dec0_immediate_current = sbs(spro->dec0_inst, 15, 0);
 	
-	//check for stalls:
-	//Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
-	//Data Hazard - RAW
+	// check for stalls:
+	// Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
+	// Data Hazard - RAW
 	if (dec0_dst_current == spro->dec1_src0 || dec0_dst_current == spro->dec1_src1){
 		sprn->stall = 1;
 	}
 	if (dec0_dst_current == spro->dec0_src0 || dec0_dst_current == spro->dec0_src1){
 		sprn->stall = 2;
 	}
-	
-	//Structural Hazard
-	if (dec0_opcode_current == LD){
-		if(spro->dec1_opcode == ST){
-			sprn->stall = 2;
-		}
+
+	switch (dec0_opcode_current) {
+		case LD:
+			if (spro->dec1_opcode == ST)
+				// Structural Hazard
+				sprn->stall = 2;
+			break;
 	}
 
 	sprn->dec1_inst = spro->dec0_inst;
-	sprn->dec1_opcode = dec1_opcode_current;
-	sprn->dec1_dst = dec1_dst_current;
+	sprn->dec1_opcode = dec0_opcode_current;
+	sprn->dec1_dst = dec0_dst_current;
 	sprn->dec1_src0 = sbs(spro->dec0_inst, 21, 19);
 	sprn->dec1_src1 = sbs(spro->dec0_inst, 18, 16);
 	sprn->dec1_immediate = ssbs(spro->dec0_inst, 15, 0);
-
-
 
 	sprn->dec1_pc = spro->dec0_pc;
 	sprn->dec1_active = 1;
