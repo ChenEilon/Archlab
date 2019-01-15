@@ -178,6 +178,7 @@ static void sp_set_pred(sp_t *sp, int taken) {
 static void sp_fetch0(sp_t *sp) {
 	llsim_mem_read(sp->srami, sp->spro->fetch0_pc);
 	sp->sprn->fetch1_pc = sp->spro->fetch0_pc;
+	sp->sprn->fetch1_active = 1;
 }
 
 
