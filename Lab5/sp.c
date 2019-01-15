@@ -36,6 +36,7 @@ typedef struct sp_registers_s {
 	int dec0_active; // 1 bit
 	int dec0_pc; // 16 bits
 	int dec0_inst; // 32 bits
+	int dec0_pred; // 2 bits
 
 	// dec1
 	int dec1_active; // 1 bit
@@ -46,6 +47,7 @@ typedef struct sp_registers_s {
 	int dec1_src1; // 3 bits
 	int dec1_dst; // 3 bits
 	int dec1_immediate; // 32 bits
+	int dec1_pred; // 2 bits
 
 	// exec0
 	int exec0_active; // 1 bit
@@ -58,6 +60,7 @@ typedef struct sp_registers_s {
 	int exec0_immediate; // 32 bits
 	int exec0_alu0; // 32 bits
 	int exec0_alu1; // 32 bits
+	int exec0_pred; // 2 bits
 
 	// exec1
 	int exec1_active; // 1 bit
@@ -74,9 +77,6 @@ typedef struct sp_registers_s {
 	
 	// stalls
 	int stall; // 3 bit
-	
-	// branch prediction
-	int pred; // 2 bit
 } sp_registers_t;
 
 /*
@@ -156,24 +156,24 @@ static int sp_reg_value(sp_registers_t *spro, int reg_num)
 
 
 static int sp_get_pred(sp_registers_t *spro) {
-	return sp->spro->pred >= 2;
+	return spro->dec0_pred >= 2;
 }
 
 
 static void sp_set_pred(sp_registers_t *spro, sp_registers_t *sprn, int taken) {
-	switch (sp->spro->pred) {
+	switch (spro->dec0_pred) {
 		case 0:
-			sp->sprn->pred = sp->spro->pred + !!taken;
+			sprn->dec0_pred = spro->dec0_pred + !!taken;
 			break;
 		case 1:
 		case 2:
-			sp->sprn->pred = sp->spro->pred + 2*!!taken - 1;
+			sprn->dec0_pred = spro->dec0_pred + 2*!!taken - 1;
 			break;
 		case 3:
-			sp->sprn->pred = sp->spro->pred - !taken;
+			sprn->dec0_pred = spro->dec0_pred - !taken;
 			break;
 		default:
-			sp->sprn->pred = 0;
+			sprn->dec0_pred = 0;
 	}
 }
 
@@ -234,6 +234,8 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 	sprn->dec1_src1 = sbs(spro->dec0_inst, 18, 16);
 	sprn->dec1_immediate = ssbs(spro->dec0_inst, 15, 0);
 
+	sprn->dec1_pred = spro->dec0_pred;
+
 	sprn->dec1_pc = spro->dec0_pc;
 	sprn->dec1_active = 1;
 }
@@ -254,6 +256,9 @@ static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
 	sprn->exec0_src0 = spro->dec1_src0;
 	sprn->exec0_src1 = spro->dec1_src1;
 	sprn->exec0_immediate = spro->dec1_immediate;
+
+	sprn->exec0_pred = spro->dec1_pred;
+
 	sprn->exec0_pc = spro->dec1_pc;
 	sprn->exec0_active = 1;
 }
@@ -352,6 +357,7 @@ static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
 		case JLE:
 		case JEQ:
 		case JNE:
+			sp_set_pred(spro->exec1_aluout);
 			if (spro->exec1_aluout) {
 				//TODO - flush if needed?
 				sprn->fetch0_pc = spro->exec1_immediate;
