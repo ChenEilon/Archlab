@@ -141,7 +141,7 @@ static void dump_sram(sp_t *sp, char *name, llsim_memory_t *sram)
 
 static void sp_fetch0(sp_t *sp) {
 	llsim_mem_read(sp->srami, sp->spro->fetch0_pc);
-	sp->sprn->fetch1_pc = sp->spro->fetch0_pc
+	sp->sprn->fetch1_pc = sp->spro->fetch0_pc;
 }
 
 static void sp_fetch1(sp_t *sp) {
