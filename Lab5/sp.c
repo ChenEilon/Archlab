@@ -142,14 +142,31 @@ static void dump_sram(sp_t *sp, char *name, llsim_memory_t *sram)
 	fclose(fp);
 }
 
+
+static int sp_reg_value(sp_registers_t *spro, int reg_num)
+{
+	if (reg_num == 1)
+		return spro->immediate;
+
+	if (reg_num >= 2 && reg_num <= 7)
+		return spro->r[reg_num];
+
+	return 0;
+}
+
+
 static void sp_fetch0(sp_t *sp) {
 	llsim_mem_read(sp->srami, sp->spro->fetch0_pc);
 	sp->sprn->fetch1_pc = sp->spro->fetch0_pc;
 }
 
+
 static void sp_fetch1(sp_t *sp) {
 	sp->sprn->dec0_inst = llsim_mem_extract_dataout(sp->srami, 31, 0);
+    sp->sprn->dec0_pc = sp->spro->fetch1_pc;
+    sp->sprn->dec0_active = 1;
 }
+
 
 static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 	int dec0_opcode_current = sbs(spro->dec0_inst, 29, 25);
@@ -178,10 +195,28 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 	sprn->dec1_src0 = sbs(spro->dec0_inst, 21, 19);
 	sprn->dec1_src1 = sbs(spro->dec0_inst, 18, 16);
 	sprn->dec1_immediate = ssbs(spro->dec0_inst, 15, 0);
+    
+    sprn->dec1_pc = spro->dec0_pc;
+    sprn->dec1_active = 1;
 }
 
 static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
-	
+	if (spro->opcode == LHI) {
+		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_dst);
+		sprn->exec0_alu1 = spro->immediate;
+	} else {
+		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_src0);
+		sprn->exec0_alu1 = sp_reg_value(spro, spro->dec1_src1);
+	}
+    
+    sprn->exec0_inst = spro->dec1_inst;
+    sprn->exec0_opcode = spro->dec1_opcode;
+	sprn->exec0_dst = spro->dec1_dst;
+	sprn->exec0_src0 = spro->dec1_src0;
+	sprn->exec0_src1 = spro->dec1_src1;
+	sprn->exec0_immediate = spro->dec1_immediate;
+    sprn->exec0_pc = spro->dec1_pc;
+    sprn->exec0_active = 1;
 }
 
 static void sp_exec0(sp_registers_t *spro, sp_registers_t *sprn) {
@@ -273,14 +308,14 @@ static void sp_ctl(sp_t *sp)
 	}
 
 	// fetch1
-	//sprn->dec0_active = 0;
-	if (spro->stall == 0) { // && spro->fetch1_active
+	sprn->dec0_active = 0;
+	if (spro->fetch1_active && spro->stall == 0) {  
 		sp_fetch1(sp);
 	}
 
 	// dec0
-	//sprn->dec1_active = 0;
-	if (spro->stall == 0) { // && spro->dec0_active
+	sprn->dec1_active = 0;
+	if (spro->dec0_active && spro->stall == 0) { 
 		sp_dec0(spro, sprn);
 	}
 
