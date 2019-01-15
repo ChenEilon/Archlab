@@ -216,12 +216,111 @@ static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
     sprn->exec0_active = 1;
 }
 
-static void sp_exec0(sp_registers_t *spro, sp_registers_t *sprn) {
-	
+static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
+	switch (spro->exec0_opcode) {
+		case ADD:
+			sprn->exec1_aluout = spro->exec0_alu0 + spro->exec0_alu1;
+			break;
+
+		case SUB:
+			sprn->exec1_aluout = spro->exec0_alu0 - spro->exec0_alu1;
+			break;
+
+		case LSF:
+			sprn->exec1_aluout = spro->exec0_alu0 << spro->exec0_alu1;
+			break;
+
+		case RSF:
+			sprn->exec1_aluout = spro->exec0_alu0 >> spro->exec0_alu1;
+			break;
+
+		case AND:
+			sprn->exec1_aluout = spro->exec0_alu0 & spro->exec0_alu1;
+			break;
+
+		case OR:
+			sprn->exec1_aluout = spro->exec0_alu0 | spro->exec0_alu1;
+			break;
+
+		case XOR:
+			sprn->exec1_aluout = spro->exec0_alu0 ^ spro->exec0_alu1;
+			break;
+
+		case LHI:
+			sprn->exec1_aluout = rbs(spro->exec0_alu0, cbs(spro->exec0_alu1, 31, 16), 31, 16);
+			break;
+
+		case LD:
+			llsim_mem_read(sp->sramd, spro->exec0_alu1);
+			break;
+
+		case JLT:
+			sprn->exec1_aluout = spro->exec0_alu0 < spro->exec0_alu1;
+			break;
+
+		case JLE:
+			sprn->exec1_aluout = spro->exec0_alu0 <= spro->exec0_alu1;
+			break;
+
+		case JEQ:
+			sprn->exec1_aluout = spro->exec0_alu0 == spro->exec0_alu1;
+			break;
+
+		case JNE:
+			sprn->exec1_aluout = spro->exec0_alu0 != spro->exec0_alu1;
+			break;
+	}
+    
+    sprn->exec1_inst = spro->exec0_inst;
+    sprn->exec1_opcode = spro->exec0_opcode;
+	sprn->exec1_dst = spro->exec0_dst;
+	sprn->exec1_src0 = spro->exec0_src0;
+	sprn->exec1_src1 = spro->exec0_src1;
+	sprn->exec1_immediate = spro->exec0_immediate;
+    sprn->exec1_pc = spro->exec0_pc;
+    sprn->exec1_active = 1;
 }
 
 static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
-	
+
+	switch (spro->exec1_opcode) {
+		case ADD:
+		case SUB:
+		case LSF:
+		case RSF:
+		case AND:
+		case OR:
+		case XOR:
+		case LHI:
+			sprn->r[spro->exec1_dst] = spro->exec1_aluout;
+			break;
+
+		case LD:
+			sprn->r[spro->exec1_dst] = llsim_mem_extract_dataout(sp->sramd, 31, 0);
+			break;
+
+		case ST:
+			llsim_mem_set_datain(sp->sramd, spro->exec1_alu0, 31, 0);
+			llsim_mem_write(sp->sramd, spro->exec1_alu1);
+			break;
+
+		case JLT:
+		case JLE:
+		case JEQ:
+		case JNE:
+			if (spro->exec1_aluout) {
+                //TODO - flush if needed?
+				sprn->fetch0_pc = spro->exec1_immediate;
+				sprn->r[7] = spro->exec1_pc + 1;
+			}
+			break;
+
+		case JIN:
+        //TODO - flush if needed?
+			sprn->fetch0_pc = spro->exec1_alu0;
+			sprn->r[7] = spro->exec1_pc + 1;
+			break;
+	}
 }
 
 static void sp_ctl(sp_t *sp)
@@ -325,7 +424,7 @@ static void sp_ctl(sp_t *sp)
 	// exec0
 	sprn->exec1_active = 0;
 	if (spro->exec0_active) {
-		sp_exec0(spro, sprn);
+		sp_exec0(sp, spro, sprn);
 	}
 
 	// exec1
