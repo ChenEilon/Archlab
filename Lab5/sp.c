@@ -139,8 +139,9 @@ static void dump_sram(sp_t *sp, char *name, llsim_memory_t *sram)
 	fclose(fp);
 }
 
-static void sp_fetch0(sp_registers_t *spro, sp_registers_t *sprn) {
-	llsim_mem_read(sp->srami, spro->pc);
+static void sp_fetch0(sp_t *sp) {
+	llsim_mem_read(sp->srami, sp->spro->fetch0_pc);
+	sp->sprn->fetch1_pc = sp->spro->fetch0_pc
 }
 
 static void sp_fetch1(sp_t *sp) {
@@ -265,7 +266,7 @@ static void sp_ctl(sp_t *sp)
 	// fetch0
 	sprn->fetch1_active = 0;
 	if (spro->fetch0_active) {
-		sp_fetch0(spro, sprn);
+		sp_fetch0(sp);
 	}
 
 	// fetch1
