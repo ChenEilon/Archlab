@@ -71,9 +71,9 @@ typedef struct sp_registers_s {
 	int exec1_alu0; // 32 bits
 	int exec1_alu1; // 32 bits
 	int exec1_aluout;
-    
-    // stalls
-    int stall; // 3 bit
+	
+	// stalls
+	int stall; // 3 bit
 	
 	// branch prediction
 	int pred; // 2 bit
@@ -155,50 +155,74 @@ static int sp_reg_value(sp_registers_t *spro, int reg_num)
 }
 
 
+static int sp_get_pred(sp_t *sp) {
+	return sp->spro->pred >= 2;
+}
+
+
+static void sp_set_pred(sp_t *sp, int taken) {
+	switch (sp->spro->pred) {
+		case 0:
+			sp->sprn->pred = sp->spro->pred + !!taken;
+		case 1:
+		case 2:
+			sp->sprn->pred = sp->spro->pred + 2*!!taken - 1;
+		case 3:
+			sp->sprn->pred = sp->spro->pred - !taken;
+		default:
+			sp->sprn->pred = 0;
+	}
+}
+
+
 static void sp_fetch0(sp_t *sp) {
 	llsim_mem_read(sp->srami, sp->spro->fetch0_pc);
 	sp->sprn->fetch1_pc = sp->spro->fetch0_pc;
+	sp->sprn->fetch1_active = 1;
 }
 
 
 static void sp_fetch1(sp_t *sp) {
 	sp->sprn->dec0_inst = llsim_mem_extract_dataout(sp->srami, 31, 0);
-    sp->sprn->dec0_pc = sp->spro->fetch1_pc;
-    sp->sprn->dec0_active = 1;
+	sp->sprn->dec0_pc = sp->spro->fetch1_pc;
+	sp->sprn->dec0_active = 1;
 }
 
 
 static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 	int dec0_opcode_current = sbs(spro->dec0_inst, 29, 25);
-    int dec0_dst_current = sbs(spro->dec0_inst, 24, 22);
-    
-    //check for stalls:
-    //Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
-    //Data Hazard - RAW
-    if (dec0_dst_current == spro->dec1_src0 || dec0_dst_current == spro->dec1_src1){
-        sprn->stall = 1;
-    }
-    if (dec0_dst_current == spro->dec0_src0 || dec0_dst_current == spro->dec0_src1){
-        sprn->stall = 2;
-    }
-    
-    //Structural Hazard
-    if (dec0_opcode_current == LD){
-        if(spro->dec1_opcode == ST){
-            sprn->stall = 2;
-        }
-    }
+	int dec0_dst_current = sbs(spro->dec0_inst, 24, 22);
+	
+	//check for stalls:
+	//Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
+	//Data Hazard - RAW
+	if (dec0_dst_current == spro->dec1_src0 || dec0_dst_current == spro->dec1_src1){
+		sprn->stall = 1;
+	}
+	if (dec0_dst_current == spro->dec0_src0 || dec0_dst_current == spro->dec0_src1){
+		sprn->stall = 2;
+	}
+	
+	//Structural Hazard
+	if (dec0_opcode_current == LD){
+		if(spro->dec1_opcode == ST){
+			sprn->stall = 2;
+		}
+	}
 
-    sprn->dec1_inst = spro->dec0_inst;
-    sprn->dec1_opcode = dec1_opcode_current;
+	sprn->dec1_inst = spro->dec0_inst;
+	sprn->dec1_opcode = dec1_opcode_current;
 	sprn->dec1_dst = dec1_dst_current;
 	sprn->dec1_src0 = sbs(spro->dec0_inst, 21, 19);
 	sprn->dec1_src1 = sbs(spro->dec0_inst, 18, 16);
 	sprn->dec1_immediate = ssbs(spro->dec0_inst, 15, 0);
-    
-    sprn->dec1_pc = spro->dec0_pc;
-    sprn->dec1_active = 1;
+
+
+
+	sprn->dec1_pc = spro->dec0_pc;
+	sprn->dec1_active = 1;
 }
+
 
 static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
 	if (spro->opcode == LHI) {
@@ -208,16 +232,17 @@ static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
 		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_src0);
 		sprn->exec0_alu1 = sp_reg_value(spro, spro->dec1_src1);
 	}
-    
-    sprn->exec0_inst = spro->dec1_inst;
-    sprn->exec0_opcode = spro->dec1_opcode;
+
+	sprn->exec0_inst = spro->dec1_inst;
+	sprn->exec0_opcode = spro->dec1_opcode;
 	sprn->exec0_dst = spro->dec1_dst;
 	sprn->exec0_src0 = spro->dec1_src0;
 	sprn->exec0_src1 = spro->dec1_src1;
 	sprn->exec0_immediate = spro->dec1_immediate;
-    sprn->exec0_pc = spro->dec1_pc;
-    sprn->exec0_active = 1;
+	sprn->exec0_pc = spro->dec1_pc;
+	sprn->exec0_active = 1;
 }
+
 
 static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 	switch (spro->exec0_opcode) {
@@ -273,16 +298,17 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 			sprn->exec1_aluout = spro->exec0_alu0 != spro->exec0_alu1;
 			break;
 	}
-    
-    sprn->exec1_inst = spro->exec0_inst;
-    sprn->exec1_opcode = spro->exec0_opcode;
+
+	sprn->exec1_inst = spro->exec0_inst;
+	sprn->exec1_opcode = spro->exec0_opcode;
 	sprn->exec1_dst = spro->exec0_dst;
 	sprn->exec1_src0 = spro->exec0_src0;
 	sprn->exec1_src1 = spro->exec0_src1;
 	sprn->exec1_immediate = spro->exec0_immediate;
-    sprn->exec1_pc = spro->exec0_pc;
-    sprn->exec1_active = 1;
+	sprn->exec1_pc = spro->exec0_pc;
+	sprn->exec1_active = 1;
 }
+
 
 static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
 
@@ -312,19 +338,20 @@ static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
 		case JEQ:
 		case JNE:
 			if (spro->exec1_aluout) {
-                //TODO - flush if needed?
+				//TODO - flush if needed?
 				sprn->fetch0_pc = spro->exec1_immediate;
 				sprn->r[7] = spro->exec1_pc + 1;
 			}
 			break;
 
 		case JIN:
-        //TODO - flush if needed?
+		//TODO - flush if needed?
 			sprn->fetch0_pc = spro->exec1_alu0;
 			sprn->r[7] = spro->exec1_pc + 1;
 			break;
 	}
 }
+
 
 static void sp_ctl(sp_t *sp)
 {
@@ -395,10 +422,10 @@ static void sp_ctl(sp_t *sp)
 
 	if (sp->start)
 		sprn->fetch0_active = 1;
-    
-    // stall handling
-    if(spro->stall)
-        sprn->stall = spro->stall - 1;
+
+	// stall handling
+	if(spro->stall)
+		sprn->stall = spro->stall - 1;
 
 	// fetch0
 	sprn->fetch1_active = 0;
