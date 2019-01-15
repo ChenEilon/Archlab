@@ -155,12 +155,12 @@ static int sp_reg_value(sp_registers_t *spro, int reg_num)
 }
 
 
-static int sp_get_pred(sp_t *sp) {
+static int sp_get_pred(sp_registers_t *spro) {
 	return sp->spro->pred >= 2;
 }
 
 
-static void sp_set_pred(sp_t *sp, int taken) {
+static void sp_set_pred(sp_registers_t *spro, sp_registers_t *sprn, int taken) {
 	switch (sp->spro->pred) {
 		case 0:
 			sp->sprn->pred = sp->spro->pred + !!taken;
@@ -209,9 +209,21 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 
 	switch (dec0_opcode_current) {
 		case LD:
-			if (spro->dec1_opcode == ST)
+			if (spro->dec1_opcode == ST) {
 				// Structural Hazard
 				sprn->stall = 2;
+			}
+			break;
+		case JLT:
+		case JLE:
+		case JEQ:
+		case JNE:
+			// branch prediction
+			if (sp_get_pred(spro)) {
+				sprn->fetch0_pc = dec0_immediate_current;
+				sprn->fetch1_active = 0;
+				sprn->dec0_active = 0;
+			}
 			break;
 	}
 
@@ -432,7 +444,7 @@ static void sp_ctl(sp_t *sp)
 
 	// fetch0
 	sprn->fetch1_active = 0;
-	if (spro->fetch0_active) {
+	if (spro->fetch0_active && spro->stall == 0) {
 		sp_fetch0(sp);
 	}
 
