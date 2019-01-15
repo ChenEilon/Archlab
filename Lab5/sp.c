@@ -143,12 +143,37 @@ static void sp_fetch0(sp_registers_t *spro, sp_registers_t *sprn) {
 	
 }
 
-static void sp_fetch1(sp_registers_t *spro, sp_registers_t *sprn) {
-	//sprn->inst = llsim_mem_extract_dataout(sp->sram, 31, 0);
+static void sp_fetch1(sp_t *sp) {
+	sp->sprn->dec0_inst = llsim_mem_extract_dataout(sp->srami, 31, 0);
 }
 
 static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
-	
+	int dec0_opcode_current = sbs(spro->dec0_inst, 29, 25);
+    int dec0_dst_current = sbs(spro->dec0_inst, 24, 22);
+    
+    //check for stalls:
+    //Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
+    //Data Hazard - RAW
+    if (dec0_dst_current == spro->dec1_src0 || dec0_dst_current == spro->dec1_src1){
+        sprn->stall = 1;
+    }
+    if (dec0_dst_current == spro->dec0_src0 || dec0_dst_current == spro->dec0_src1){
+        sprn->stall = 2;
+    }
+    
+    //Structural Hazard
+    if (dec0_opcode_current == LD){
+        if(spro->dec1_opcode == ST){
+            sprn->stall = 2;
+        }
+    }
+
+    sprn->dec1_inst = spro->dec0_inst;
+    sprn->dec1_opcode = dec1_opcode_current;
+	sprn->dec1_dst = dec1_dst_current;
+	sprn->dec1_src0 = sbs(spro->dec0_inst, 21, 19);
+	sprn->dec1_src1 = sbs(spro->dec0_inst, 18, 16);
+	sprn->dec1_immediate = ssbs(spro->dec0_inst, 15, 0);
 }
 
 static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
@@ -244,14 +269,14 @@ static void sp_ctl(sp_t *sp)
 	}
 
 	// fetch1
-	sprn->dec0_active = 0;
-	if (spro->fetch1_active) {
-		sp_fetch1(spro, sprn);
+	//sprn->dec0_active = 0;
+	if (spro->stall == 0) { // && spro->fetch1_active
+		sp_fetch1(sp);
 	}
 
 	// dec0
-	sprn->dec1_active = 0;
-	if (spro->dec0_active) {
+	//sprn->dec1_active = 0;
+	if (spro->stall == 0) { // && spro->dec0_active
 		sp_dec0(spro, sprn);
 	}
 
