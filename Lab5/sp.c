@@ -263,6 +263,8 @@ static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
 
 
 static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
+	int taken;
+
 	switch (spro->exec0_opcode) {
 		case ADD:
 			sprn->exec1_aluout = spro->exec0_alu0 + spro->exec0_alu1;
@@ -301,20 +303,30 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 			break;
 
 		case JLT:
-			sprn->exec1_aluout = spro->exec0_alu0 < spro->exec0_alu1;
+			taken = spro->exec0_alu0 < spro->exec0_alu1;
 			break;
 
 		case JLE:
-			sprn->exec1_aluout = spro->exec0_alu0 <= spro->exec0_alu1;
+			taken = spro->exec0_alu0 <= spro->exec0_alu1;
 			break;
 
 		case JEQ:
-			sprn->exec1_aluout = spro->exec0_alu0 == spro->exec0_alu1;
+			taken = spro->exec0_alu0 == spro->exec0_alu1;
 			break;
 
 		case JNE:
-			sprn->exec1_aluout = spro->exec0_alu0 != spro->exec0_alu1;
+			taken = spro->exec0_alu0 != spro->exec0_alu1;
 			break;
+	}
+
+	if (spro->exec0_opcode == JLT || spro->exec0_opcode == JLE || spro->exec0_opcode == JEQ || spro->exec0_opcode == JNE) {
+		sprn->exec1_aluout = taken;
+		if (spro->exec0_pred == 0 && taken == 1 || spro->exec0_pred == 1 && taken == 0) {
+			sprn->fetch1_active = 0;
+			sprn->dec0_active = 0;
+			sprn->dec1_active = 0;
+			sprn->exec0_active = 0;
+		}
 	}
 
 	sprn->exec1_inst = spro->exec0_inst;
@@ -329,7 +341,6 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 
 
 static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
-
 	switch (spro->exec1_opcode) {
 		case ADD:
 		case SUB:
@@ -355,7 +366,7 @@ static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
 		case JLE:
 		case JEQ:
 		case JNE:
-			sp_set_pred(spro->exec1_aluout);
+			sp_set_pred(spro, sprn, spro->exec1_aluout);
 			if (spro->exec1_aluout) {
 				//TODO - flush if needed?
 				sprn->fetch0_pc = spro->exec1_immediate;
