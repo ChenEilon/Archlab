@@ -192,10 +192,6 @@ r[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
 
 static void sp_trace_exec(sp_registers_t *spro)
 {
-	if (nr_simulated_instructions == 0) {
-		return;
-	}
-
 	switch (spro->exec1_opcode) {
 		case ADD:
 		case SUB:
@@ -629,7 +625,6 @@ static void sp_ctl(sp_t *sp)
 	sprn->fetch1_active = 0;
 	if (spro->fetch0_active && spro->stall == 0) {
 		sp_fetch0(sp, spro, sprn);
-		sp_trace_exec(spro);
 	}
 
 	// fetch1
@@ -659,13 +654,14 @@ static void sp_ctl(sp_t *sp)
 	// exec1
 	if (spro->exec1_active) {
 		sp_exec1(sp, spro, sprn);
+		sp_trace_inst(spro);
+		sp_trace_exec(spro);
 		if (spro->exec1_opcode == HLT) {
 			sp_trace_exec(spro);
 			llsim_stop();
 			dump_sram(sp, "srami_out.txt", sp->srami);
 			dump_sram(sp, "sramd_out.txt", sp->sramd);
 		}
-		sp_trace_inst(spro);
 	}
 }
 
@@ -710,7 +706,7 @@ static void sp_generate_sram_memory_image(sp_t *sp, char *program_name)
         }
 	sp->memory_image_size = addr;
 
-        fprintf(inst_trace_fp, "program %s loaded, %d lines\n", program_name, addr);
+        fprintf(inst_trace_fp, "program %s loaded, %d lines\n\n", program_name, addr);
 
 	for (i = 0; i < sp->memory_image_size; i++) {
 		llsim_mem_inject(sp->srami, i, sp->memory_image[i], 31, 0);
