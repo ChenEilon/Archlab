@@ -448,7 +448,7 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 				sprn->stall = 2;
 			} else if (
 				sp_wb_op(spro->exec0_opcode)
-				&& (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst || dec0_dst == sprp->exec0_dst)
+				&& (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst || dec0_dst == spro->exec0_dst)
 				&& spro->dec0_pc >= 2) {
 				sprn->stall = 1;
 			}
