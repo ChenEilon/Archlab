@@ -299,7 +299,7 @@ sim finished at pc %d, %d instructions",
 				inst_trace_fp,
 				">>>> EXEC: R[%d] = POL = %d <<<<\n\n",
 				spro->exec1_dst,
-				sp_reg_value(spro, spro->exec1_immediate, spro->exec1_dst));
+				spro->exec1_aluout);
 			break;
 
 		default:
@@ -319,7 +319,8 @@ static int sp_wb_op(int opcode) {
 		|| opcode == OR
 		|| opcode == XOR
 		|| opcode == LHI
-		|| opcode == LD;
+		|| opcode == LD
+		|| opcode == POL;
 }
 
 
