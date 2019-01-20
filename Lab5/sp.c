@@ -167,12 +167,7 @@ static int sp_wb_op(int opcode) {
 		|| opcode == OR
 		|| opcode == XOR
 		|| opcode == LHI
-		|| opcode == LD
-		|| opcode == JLT
-		|| opcode == JLE
-		|| opcode == JEQ
-		|| opcode == JNE
-		|| opcode == JIN;
+		|| opcode == LD;
 }
 
 
