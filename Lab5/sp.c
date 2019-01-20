@@ -408,12 +408,19 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 			// check for stalls:
 			// Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
 			// Data Hazard - RAW
-			if (sp_wb_op(spro->dec1_opcode) && (dec0_src0 == spro->dec1_dst || dec0_src1 == spro->dec1_dst) && spro->dec0_pc >= 1) {
+			if (
+				sp_wb_op(spro->dec1_opcode)
+				&& (dec0_src0 == spro->dec1_dst || dec0_src1 == spro->dec1_dst)
+				&& spro->dec0_pc >= 1) {
 				sprn->stall = 2;
-			} else if (sp_wb_op(spro->exec0_opcode) && (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst) && spro->dec0_pc >= 2) {
+			} else if (
+				sp_wb_op(spro->exec0_opcode)
+				&& (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst)
+				&& spro->dec0_pc >= 2) {
 				sprn->stall = 1;
 			}
 			break;
+
 		case LD:
 			if (sp_wb_op(spro->dec1_opcode) && dec0_src1 == spro->dec1_dst) {
 				sprn->stall = 2;
@@ -424,10 +431,25 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 				sprn->stall = 1;
 			}
 			break;
+
 		case JIN:
 			if (sp_wb_op(spro->dec1_opcode) && dec0_src0 == spro->dec1_dst) {
 				sprn->stall = 2;
 			} else if (sp_wb_op(spro->exec0_opcode) && dec0_src0 == spro->exec0_dst) {
+				sprn->stall = 1;
+			}
+			break;
+
+		case DMA:
+			if (
+				sp_wb_op(spro->dec1_opcode)
+				&& (dec0_src0 == spro->dec1_dst || dec0_src1 == spro->dec1_dst || dec0_dst == spro->dec1_dst)
+				&& spro->dec0_pc >= 1) {
+				sprn->stall = 2;
+			} else if (
+				sp_wb_op(spro->exec0_opcode)
+				&& (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst || dec0_dst == sprp->exec0_dst)
+				&& spro->dec0_pc >= 2) {
 				sprn->stall = 1;
 			}
 			break;
