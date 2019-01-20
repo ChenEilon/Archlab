@@ -513,6 +513,8 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 	sprn->exec1_src0 = spro->exec0_src0;
 	sprn->exec1_src1 = spro->exec0_src1;
 	sprn->exec1_immediate = spro->exec0_immediate;
+	sprn->exec1_alu0 = spro->exec0_alu0;
+	sprn->exec1_alu1 = spro->exec0_alu1;
 	sprn->exec1_pc = spro->exec0_pc;
 	sprn->exec1_active = 1;
 }
