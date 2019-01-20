@@ -193,7 +193,6 @@ r[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
 static void sp_trace_exec(sp_registers_t *spro)
 {
 	if (nr_simulated_instructions == 0) {
-		fprintf(inst_trace_fp, "\n");
 		return;
 	}
 
@@ -363,9 +362,9 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 			// check for stalls:
 			// Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
 			// Data Hazard - RAW
-			if (sp_wb_op(spro->dec1_opcode) && (dec0_src0 == spro->dec1_dst || dec0_src1 == spro->dec1_dst)) {
+			if (sp_wb_op(spro->dec1_opcode) && (dec0_src0 == spro->dec1_dst || dec0_src1 == spro->dec1_dst) && spro->dec0_pc >= 1) {
 				sprn->stall = 2;
-			} else if (sp_wb_op(spro->exec0_opcode) && (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst)) {
+			} else if (sp_wb_op(spro->exec0_opcode) && (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst) && spro->dec0_pc >= 2) {
 				sprn->stall = 1;
 			}
 			break;
