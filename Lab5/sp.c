@@ -529,6 +529,7 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 			sprn->dec1_opcode = FLS;
 			sprn->exec0_active = 0;
 			sprn->exec0_opcode = FLS;
+			sprn->fetch0_pc = spro->exec0_immediate;
 		}
 	}
 
