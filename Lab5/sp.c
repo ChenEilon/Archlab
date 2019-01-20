@@ -396,6 +396,7 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 				sprn->fetch0_pc = dec0_immediate;
 				sprn->fetch1_active = 0;
 				sprn->dec0_active = 0;
+				sprn->stall = 0;
 			}
 		case ADD:
 		case SUB:
@@ -500,6 +501,7 @@ static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
 		sprn->fetch1_active = 0;
 		sprn->dec0_active = 0;
 		sprn->dec1_active = 0;
+		sprn->stall = 0;
 	}
 
 	sprn->exec0_pred = spro->dec1_pred;
@@ -587,6 +589,7 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 			sprn->exec0_active = 0;
 			sprn->exec0_opcode = FLS;
 			sprn->fetch0_pc = taken ? spro->exec0_immediate : spro->exec0_pc + 1;
+			sprn->stall = 0;
 		}
 	}
 
