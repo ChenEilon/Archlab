@@ -219,7 +219,7 @@ static void sp_trace_exec(sp_registers_t *spro)
 				">>>> EXEC: R[%d] = MEM[%d] = %08x <<<<\n\n",
 				spro->exec1_dst,
 				spro->exec1_alu1,
-				sp_reg_value(spro, spro->exec1_immediate, spro->exec1_dst));
+				llsim_mem_extract_dataout(sp->sramd, 31, 0));
 			break;
 
 		case ST:
