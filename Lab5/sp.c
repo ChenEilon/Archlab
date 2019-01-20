@@ -125,10 +125,10 @@ static void sp_reset(sp_t *sp)
 #define DMA 30
 #define POL 31
 
-// static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR", "LHI",
-// 				 "LD", "ST", "U", "U", "U", "U", "U", "U",
-// 				 "JLT", "JLE", "JEQ", "JNE", "JIN", "U", "U", "U",
-// 				 "HLT", "U", "U", "U", "U", "U", "U", "U"};
+static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR", "LHI",
+				 "LD", "ST", "U", "U", "U", "U", "U", "U",
+				 "JLT", "JLE", "JEQ", "JNE", "JIN", "U", "U", "U",
+				 "HLT", "FLS", "U", "U", "U", "U", "DMA", "POL"};
 
 static void dump_sram(sp_t *sp, char *name, llsim_memory_t *sram)
 {
@@ -155,6 +155,131 @@ static int sp_reg_value(sp_registers_t *spro, int immediate, int reg_num)
 		return spro->r[reg_num];
 
 	return 0;
+}
+
+
+static void sp_trace_inst(sp_registers_t *spro)
+{
+	fprintf(
+		inst_trace_fp,
+		"--- instruction %d (%04x) @ PC %d (%04x) -----------------------------------------------------------\n\
+pc = %04d, inst = %08x, opcode = %d (%s), dst = %d, src0 = %d, src1 = %d, immediate = %08x\n\
+r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x \n\
+r[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
+		nr_simulated_instructions,
+		nr_simulated_instructions,
+		spro->exec1_pc,
+		spro->exec1_pc,
+		spro->exec1_pc,
+		spro->exec1_inst,
+		spro->exec1_opcode,
+		opcode_name[spro->exec1_opcode],
+		spro->exec1_dst,
+		spro->exec1_src0,
+		spro->exec1_src1,
+		spro->exec1_immediate,
+		sp_reg_value(spro, spro->exec1_immediate, 0),
+		sp_reg_value(spro, spro->exec1_immediate, 1),
+		sp_reg_value(spro, spro->exec1_immediate, 2),
+		sp_reg_value(spro, spro->exec1_immediate, 3),
+		sp_reg_value(spro, spro->exec1_immediate, 4),
+		sp_reg_value(spro, spro->exec1_immediate, 5),
+		sp_reg_value(spro, spro->exec1_immediate, 6),
+		sp_reg_value(spro, spro->exec1_immediate, 7));
+
+	nr_simulated_instructions++;
+}
+
+static void sp_trace_exec(sp_registers_t *spro)
+{
+	if (nr_simulated_instructions == 0) {
+		fprintf(inst_trace_fp, "\n");
+		return;
+	}
+
+	switch (spro->exec1_opcode) {
+		case ADD:
+		case SUB:
+		case LSF:
+		case RSF:
+		case AND:
+		case OR:
+		case XOR:
+		case LHI:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: R[%d] = %d %s %d <<<<\n\n",
+				spro->exec1_dst,
+				spro->exec1_alu0,
+				opcode_name[spro->exec1_opcode],
+				spro->exec1_alu1);
+			break;
+
+		case LD:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: R[%d] = MEM[%d] = %08x <<<<\n\n",
+				spro->exec1_dst,
+				spro->exec1_alu1,
+				sp_reg_value(spro, spro->exec1_immediate, spro->exec1_dst));
+			break;
+
+		case ST:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: MEM[%d] = R[%d] = %08x <<<<\n\n",
+				spro->exec1_alu1,
+				spro->exec1_src0,
+				spro->exec1_alu0);
+			break;
+
+		case JLT:
+		case JLE:
+		case JEQ:
+		case JNE:
+		case JIN:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: %s %d, %d, %d <<<<\n\n",
+				opcode_name[spro->exec1_opcode],
+				spro->exec1_alu0,
+				spro->exec1_alu1,
+				spro->exec1_pc);
+			break;
+
+		case HLT:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: HALT at PC %04x<<<<\n\
+sim finished at pc %d, %d instructions",
+				spro->exec1_pc,
+				spro->exec1_pc,
+				nr_simulated_instructions);
+			break;
+
+		case FLS:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: FLUSH <<<<\n\n");
+			break;
+
+		case DMA:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: DMA %d -> %d (%d) <<<<\n\n",
+				sp_reg_value(spro, spro->exec1_immediate, spro->exec1_src1),
+				sp_reg_value(spro, spro->exec1_immediate, spro->exec1_dst),
+				sp_reg_value(spro, spro->exec1_immediate, spro->exec1_src0));
+			break;
+
+		case POL:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: R[%d] = POL = %d <<<<\n\n",
+				spro->exec1_dst,
+				sp_reg_value(spro, spro->exec1_immediate, spro->exec1_dst));
+			break;
+	}
 }
 
 
@@ -505,6 +630,7 @@ static void sp_ctl(sp_t *sp)
 	sprn->fetch1_active = 0;
 	if (spro->fetch0_active && spro->stall == 0) {
 		sp_fetch0(sp, spro, sprn);
+		sp_trace_exec(spro);
 	}
 
 	// fetch1
@@ -535,10 +661,12 @@ static void sp_ctl(sp_t *sp)
 	if (spro->exec1_active) {
 		sp_exec1(sp, spro, sprn);
 		if (spro->exec1_opcode == HLT) {
+			sp_trace_exec(spro);
 			llsim_stop();
 			dump_sram(sp, "srami_out.txt", sp->srami);
 			dump_sram(sp, "sramd_out.txt", sp->sramd);
 		}
+		sp_trace_inst(spro);
 	}
 }
 
