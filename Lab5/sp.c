@@ -146,10 +146,10 @@ static void dump_sram(sp_t *sp, char *name, llsim_memory_t *sram)
 }
 
 
-static int sp_reg_value(sp_registers_t *spro, int reg_num)
+static int sp_reg_value(sp_registers_t *spro, int immediate, int reg_num)
 {
 	if (reg_num == 1)
-		return spro->immediate;
+		return immediate;
 
 	if (reg_num >= 2 && reg_num <= 7)
 		return spro->r[reg_num];
@@ -277,15 +277,15 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 
 static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
 	if (spro->dec1_opcode == LHI) {
-		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_dst);
-		sprn->exec0_alu1 = spro->immediate;
+		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_immediate, spro->dec1_dst);
+		sprn->exec0_alu1 = spro->dec1_immediate;
 	} else {
-		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_src0);
-		sprn->exec0_alu1 = sp_reg_value(spro, spro->dec1_src1);
+		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_immediate, spro->dec1_src0);
+		sprn->exec0_alu1 = sp_reg_value(spro, spro->dec1_immediate, spro->dec1_src1);
 	}
 
 	if (spro->dec1_opcode == JIN) {
-		sprn->fetch0_pc = sp_reg_value(spro, spro->dec1_src0);
+		sprn->fetch0_pc = sp_reg_value(spro, spro->dec1_immediate, spro->dec1_src0);
 		sprn->fetch1_active = 0;
 		sprn->dec0_active = 0;
 		sprn->dec1_active = 0;
