@@ -364,7 +364,7 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 	if (spro->exec0_opcode == JLT || spro->exec0_opcode == JLE || spro->exec0_opcode == JEQ || spro->exec0_opcode == JNE) {
 		sprn->exec1_aluout = taken;
 		sp_set_pred(spro, sprn, taken);
-		if (spro->exec0_pred == 0 && taken == 1 || spro->exec0_pred == 1 && taken == 0) {
+		if ((spro->exec0_pred == 0 && taken == 1) || (spro->exec0_pred == 1 && taken == 0)) {
 			sprn->fetch1_active = 0;
 			sprn->dec0_active = 0;
 			sprn->dec1_active = 0;
@@ -385,7 +385,7 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 }
 
 
-static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
+static void sp_exec1(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 	switch (spro->exec1_opcode) {
 		case ADD:
 		case SUB:
@@ -532,7 +532,7 @@ static void sp_ctl(sp_t *sp)
 
 	// exec1
 	if (spro->exec1_active) {
-		sp_exec1(spro, sprn);
+		sp_exec1(sp, spro, sprn);
 		if (spro->exec1_opcode == HLT) {
 			llsim_stop();
 			dump_sram(sp, "srami_out.txt", sp->srami);
