@@ -767,15 +767,15 @@ static void sp_dma(sp_t *sp)
 			break;
 
 		case DMA_STATE_EXTRACT:
-			sprn->dma_reg = llsim_mem_extract_dataout(sp->sram, 31, 0);
+			sprn->dma_reg = llsim_mem_extract_dataout(sp->sramd, 31, 0);
 			sprn->dma_state = DMA_STATE_WRITE;
 			break;
 
 		case DMA_STATE_WRITE:
 			if (busy)
 				break;
-			llsim_mem_set_datain(sp->sram, spro->dma_reg, 31, 0);
-			llsim_mem_write(sp->sram, spro->dma_dst);
+			llsim_mem_set_datain(sp->sramd, spro->dma_reg, 31, 0);
+			llsim_mem_write(sp->sramd, spro->dma_dst);
 			sprn->dma_src = spro->dma_src + 1;
 			sprn->dma_dst = spro->dma_dst + 1;
 			sprn->dma_counter = spro->dma_counter - 1;
