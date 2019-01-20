@@ -125,10 +125,10 @@ static void sp_reset(sp_t *sp)
 #define DMA 30
 #define POL 31
 
-static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR", "LHI",
-				 "LD", "ST", "U", "U", "U", "U", "U", "U",
-				 "JLT", "JLE", "JEQ", "JNE", "JIN", "U", "U", "U",
-				 "HLT", "U", "U", "U", "U", "U", "U", "U"};
+// static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR", "LHI",
+// 				 "LD", "ST", "U", "U", "U", "U", "U", "U",
+// 				 "JLT", "JLE", "JEQ", "JNE", "JIN", "U", "U", "U",
+// 				 "HLT", "U", "U", "U", "U", "U", "U", "U"};
 
 static void dump_sram(sp_t *sp, char *name, llsim_memory_t *sram)
 {
