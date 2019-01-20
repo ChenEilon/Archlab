@@ -232,6 +232,15 @@ static void sp_trace_exec(sp_registers_t *spro)
 		case JLE:
 		case JEQ:
 		case JNE:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: %s %d, %d, %d <<<<\n\n",
+				opcode_name[spro->exec1_opcode],
+				spro->exec1_alu0,
+				spro->exec1_alu1,
+				spro->exec1_aluout ? spro->exec1_immediate : spro->exec1_pc + 1);
+			break;
+
 		case JIN:
 			fprintf(
 				inst_trace_fp,
@@ -239,7 +248,7 @@ static void sp_trace_exec(sp_registers_t *spro)
 				opcode_name[spro->exec1_opcode],
 				spro->exec1_alu0,
 				spro->exec1_alu1,
-				spro->exec1_pc);
+				spro->exec1_alu0);
 			break;
 
 		case HLT:
