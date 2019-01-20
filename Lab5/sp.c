@@ -694,8 +694,8 @@ static void sp_ctl(sp_t *sp)
 	// exec1
 	if (spro->exec1_active) {
 		sp_exec1(sp, spro, sprn);
-		sp_trace_inst(sp, spro);
-		sp_trace_exec(spro);
+		sp_trace_inst(spro);
+		sp_trace_exec(sp, spro);
 		if (spro->exec1_opcode == HLT) {
 			llsim_stop();
 			dump_sram(sp, "srami_out.txt", sp->srami);
