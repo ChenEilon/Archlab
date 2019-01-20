@@ -194,17 +194,18 @@ static void sp_set_pred(sp_registers_t *spro, sp_registers_t *sprn, int taken) {
 }
 
 
-static void sp_fetch0(sp_t *sp) {
-	llsim_mem_read(sp->srami, sp->spro->fetch0_pc);
-	sp->sprn->fetch1_pc = sp->spro->fetch0_pc;
-	sp->sprn->fetch1_active = 1;
+static void sp_fetch0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
+	llsim_mem_read(sp->srami, spro->fetch0_pc);
+	sprn->fetch0_pc = spro->fetch0_pc + 1;
+	sprn->fetch1_pc = spro->fetch0_pc;
+	sprn->fetch1_active = 1;
 }
 
 
-static void sp_fetch1(sp_t *sp) {
-	sp->sprn->dec0_inst = llsim_mem_extract_dataout(sp->srami, 31, 0);
-	sp->sprn->dec0_pc = sp->spro->fetch1_pc;
-	sp->sprn->dec0_active = 1;
+static void sp_fetch1(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
+	sprn->dec0_inst = llsim_mem_extract_dataout(sp->srami, 31, 0);
+	sprn->dec0_pc = spro->fetch1_pc;
+	sprn->dec0_active = 1;
 }
 
 
@@ -503,13 +504,13 @@ static void sp_ctl(sp_t *sp)
 	// fetch0
 	sprn->fetch1_active = 0;
 	if (spro->fetch0_active && spro->stall == 0) {
-		sp_fetch0(sp);
+		sp_fetch0(sp, spro, sprn);
 	}
 
 	// fetch1
 	sprn->dec0_active = 0;
 	if (spro->fetch1_active && spro->stall == 0) {  
-		sp_fetch1(sp);
+		sp_fetch1(sp, spro, sprn);
 	}
 
 	// dec0
