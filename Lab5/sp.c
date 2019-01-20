@@ -36,7 +36,7 @@ typedef struct sp_registers_s {
 	int dec0_active; // 1 bit
 	int dec0_pc; // 16 bits
 	int dec0_inst; // 32 bits
-	int dec0_pred; // 2 bits
+	int dec0_satc; // 2 bits
 
 	// dec1
 	int dec1_active; // 1 bit
@@ -47,7 +47,7 @@ typedef struct sp_registers_s {
 	int dec1_src1; // 3 bits
 	int dec1_dst; // 3 bits
 	int dec1_immediate; // 32 bits
-	int dec1_pred; // 2 bits
+	int dec1_pred; // 1 bits
 
 	// exec0
 	int exec0_active; // 1 bit
@@ -60,7 +60,7 @@ typedef struct sp_registers_s {
 	int exec0_immediate; // 32 bits
 	int exec0_alu0; // 32 bits
 	int exec0_alu1; // 32 bits
-	int exec0_pred; // 2 bits
+	int exec0_pred; // 1 bits
 
 	// exec1
 	int exec1_active; // 1 bit
@@ -309,24 +309,24 @@ static int sp_wb_op(int opcode) {
 
 
 static int sp_get_pred(sp_registers_t *spro) {
-	return spro->dec0_pred >= 2;
+	return spro->dec0_satc >= 2;
 }
 
 
 static void sp_set_pred(sp_registers_t *spro, sp_registers_t *sprn, int taken) {
-	switch (spro->dec0_pred) {
+	switch (spro->dec0_satc) {
 		case 0:
-			sprn->dec0_pred = spro->dec0_pred + !!taken;
+			sprn->dec0_satc = spro->dec0_satc + !!taken;
 			break;
 		case 1:
 		case 2:
-			sprn->dec0_pred = spro->dec0_pred + 2*!!taken - 1;
+			sprn->dec0_satc = spro->dec0_satc + 2*!!taken - 1;
 			break;
 		case 3:
-			sprn->dec0_pred = spro->dec0_pred - !taken;
+			sprn->dec0_satc = spro->dec0_satc - !taken;
 			break;
 		default:
-			sprn->dec0_pred = 0;
+			sprn->dec0_satc = 0;
 	}
 }
 
@@ -368,6 +368,7 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 	int dec0_src0 = sbs(spro->dec0_inst, 21, 19);
 	int dec0_src1 = sbs(spro->dec0_inst, 18, 16);
 	int dec0_immediate = sbs(spro->dec0_inst, 15, 0);
+	int dec0_pred = sp_get_pred(spro);
 
 	switch (dec0_opcode) {
 		case JLT:
@@ -375,7 +376,7 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 		case JEQ:
 		case JNE:
 			// branch prediction
-			if (sp_get_pred(spro)) {
+			if (dec0_pred) {
 				sprn->fetch0_pc = dec0_immediate;
 				sprn->fetch1_active = 0;
 				sprn->dec0_active = 0;
@@ -416,7 +417,7 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 			break;
 	}
 
-	sprn->dec1_pred = spro->dec0_pred;
+	sprn->dec1_pred = dec0_pred;
 
 	sprn->dec1_inst = spro->dec0_inst;
 	sprn->dec1_opcode = dec0_opcode;
@@ -604,7 +605,7 @@ static void sp_ctl(sp_t *sp)
 	fprintf(cycle_trace_fp, "      dec0_active %08x\n", spro->dec0_active);
 	fprintf(cycle_trace_fp, "      dec0_pc %08x\n", spro->dec0_pc);
 	fprintf(cycle_trace_fp, "      dec0_inst %08x\n", spro->dec0_inst); // 32 bits
-	fprintf(cycle_trace_fp, "      dec0_pred %08x\n", spro->dec0_pred);
+	fprintf(cycle_trace_fp, "      dec0_satc %08x\n", spro->dec0_satc);
 
 	fprintf(cycle_trace_fp, "        dec1_active %08x\n", spro->dec1_active);
 	fprintf(cycle_trace_fp, "        dec1_pc %08x\n", spro->dec1_pc); // 16 bits
