@@ -160,6 +160,9 @@ static int sp_reg_value(sp_registers_t *spro, int immediate, int reg_num)
 
 static void sp_trace_inst(sp_registers_t *spro)
 {
+	if (nr_simulated_instructions == 0)
+		fprintf(inst_trace_fp, "\n");
+
 	fprintf(
 		inst_trace_fp,
 		"--- instruction %d (%04x) @ PC %d (%04x) -----------------------------------------------------------\n\
@@ -666,7 +669,6 @@ static void sp_ctl(sp_t *sp)
 		sp_trace_inst(spro);
 		sp_trace_exec(spro);
 		if (spro->exec1_opcode == HLT) {
-			sp_trace_exec(spro);
 			llsim_stop();
 			dump_sram(sp, "srami_out.txt", sp->srami);
 			dump_sram(sp, "sramd_out.txt", sp->sramd);
@@ -715,7 +717,7 @@ static void sp_generate_sram_memory_image(sp_t *sp, char *program_name)
         }
 	sp->memory_image_size = addr;
 
-        fprintf(inst_trace_fp, "program %s loaded, %d lines\n\n", program_name, addr);
+        fprintf(inst_trace_fp, "program %s loaded, %d lines\n", program_name, addr);
 
 	for (i = 0; i < sp->memory_image_size; i++) {
 		llsim_mem_inject(sp->srami, i, sp->memory_image[i], 31, 0);
