@@ -286,6 +286,11 @@ sim finished at pc %d, %d instructions",
 				spro->exec1_dst,
 				sp_reg_value(spro, spro->exec1_immediate, spro->exec1_dst));
 			break;
+
+		default:
+			fprintf(
+				inst_trace_fp,
+				">>>> EXEC: Unknown operation <<<<\n\n");
 	}
 }
 
@@ -341,6 +346,7 @@ static void sp_fetch0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 
 static void sp_fetch1(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 	if (spro->stall) {
+		llsim_mem_read(sp->srami, spro->fetch1_pc);
 		sprn->dec0_active = 2;
 		return;
 	}
