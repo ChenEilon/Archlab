@@ -397,6 +397,7 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 				sprn->fetch1_active = 0;
 				sprn->dec0_active = 0;
 				sprn->stall = 0;
+				break;
 			}
 		case ADD:
 		case SUB:
