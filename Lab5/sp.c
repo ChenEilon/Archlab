@@ -299,7 +299,7 @@ sim finished at pc %d, %d instructions",
 				inst_trace_fp,
 				">>>> EXEC: R[%d] = POL = %d <<<<\n\n",
 				spro->exec1_dst,
-				sp_reg_value(spro, spro->exec1_immediate, spro->exec1_dst));
+				spro->exec1_aluout);
 			break;
 
 		default:
@@ -319,7 +319,8 @@ static int sp_wb_op(int opcode) {
 		|| opcode == OR
 		|| opcode == XOR
 		|| opcode == LHI
-		|| opcode == LD;
+		|| opcode == LD
+		|| opcode == POL;
 }
 
 
@@ -395,6 +396,8 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 				sprn->fetch0_pc = dec0_immediate;
 				sprn->fetch1_active = 0;
 				sprn->dec0_active = 0;
+				sprn->stall = 0;
+				break;
 			}
 		case ADD:
 		case SUB:
@@ -407,12 +410,19 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 			// check for stalls:
 			// Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
 			// Data Hazard - RAW
-			if (sp_wb_op(spro->dec1_opcode) && (dec0_src0 == spro->dec1_dst || dec0_src1 == spro->dec1_dst) && spro->dec0_pc >= 1) {
+			if (
+				sp_wb_op(spro->dec1_opcode)
+				&& (dec0_src0 == spro->dec1_dst || dec0_src1 == spro->dec1_dst)
+				&& spro->dec0_pc >= 1) {
 				sprn->stall = 2;
-			} else if (sp_wb_op(spro->exec0_opcode) && (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst) && spro->dec0_pc >= 2) {
+			} else if (
+				sp_wb_op(spro->exec0_opcode)
+				&& (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst)
+				&& spro->dec0_pc >= 2) {
 				sprn->stall = 1;
 			}
 			break;
+
 		case LD:
 			if (sp_wb_op(spro->dec1_opcode) && dec0_src1 == spro->dec1_dst) {
 				sprn->stall = 2;
@@ -423,10 +433,25 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 				sprn->stall = 1;
 			}
 			break;
+
 		case JIN:
 			if (sp_wb_op(spro->dec1_opcode) && dec0_src0 == spro->dec1_dst) {
 				sprn->stall = 2;
 			} else if (sp_wb_op(spro->exec0_opcode) && dec0_src0 == spro->exec0_dst) {
+				sprn->stall = 1;
+			}
+			break;
+
+		case DMA:
+			if (
+				sp_wb_op(spro->dec1_opcode)
+				&& (dec0_src0 == spro->dec1_dst || dec0_src1 == spro->dec1_dst || dec0_dst == spro->dec1_dst)
+				&& spro->dec0_pc >= 1) {
+				sprn->stall = 2;
+			} else if (
+				sp_wb_op(spro->exec0_opcode)
+				&& (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst || dec0_dst == spro->exec0_dst)
+				&& spro->dec0_pc >= 2) {
 				sprn->stall = 1;
 			}
 			break;
@@ -477,6 +502,7 @@ static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
 		sprn->fetch1_active = 0;
 		sprn->dec0_active = 0;
 		sprn->dec1_active = 0;
+		sprn->stall = 0;
 	}
 
 	sprn->exec0_pred = spro->dec1_pred;
@@ -564,6 +590,7 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 			sprn->exec0_active = 0;
 			sprn->exec0_opcode = FLS;
 			sprn->fetch0_pc = taken ? spro->exec0_immediate : spro->exec0_pc + 1;
+			sprn->stall = 0;
 		}
 	}
 
