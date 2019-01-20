@@ -588,50 +588,50 @@ static void sp_ctl(sp_t *sp)
 	for (i = 2; i <= 7; i++)
 		fprintf(cycle_trace_fp, "r%d %08x\n", i, spro->r[i]);
 
-	fprintf(cycle_trace_fp, "fetch0_active %08x\n", spro->fetch0_active);
-	fprintf(cycle_trace_fp, "fetch0_pc %08x\n", spro->fetch0_pc);
+	fprintf(cycle_trace_fp, "  fetch0_active %08x\n", spro->fetch0_active);
+	fprintf(cycle_trace_fp, "  fetch0_pc %08x\n", spro->fetch0_pc);
 
-	fprintf(cycle_trace_fp, "fetch1_active %08x\n", spro->fetch1_active);
-	fprintf(cycle_trace_fp, "fetch1_pc %08x\n", spro->fetch1_pc);
+	fprintf(cycle_trace_fp, "    fetch1_active %08x\n", spro->fetch1_active);
+	fprintf(cycle_trace_fp, "    fetch1_pc %08x\n", spro->fetch1_pc);
 
-	fprintf(cycle_trace_fp, "dec0_active %08x\n", spro->dec0_active);
-	fprintf(cycle_trace_fp, "dec0_pc %08x\n", spro->dec0_pc);
-	fprintf(cycle_trace_fp, "dec0_inst %08x\n", spro->dec0_inst); // 32 bits
-	fprintf(cycle_trace_fp, "dec0_pred %08x\n", spro->dec0_pred);
+	fprintf(cycle_trace_fp, "      dec0_active %08x\n", spro->dec0_active);
+	fprintf(cycle_trace_fp, "      dec0_pc %08x\n", spro->dec0_pc);
+	fprintf(cycle_trace_fp, "      dec0_inst %08x\n", spro->dec0_inst); // 32 bits
+	fprintf(cycle_trace_fp, "      dec0_pred %08x\n", spro->dec0_pred);
 
-	fprintf(cycle_trace_fp, "dec1_active %08x\n", spro->dec1_active);
-	fprintf(cycle_trace_fp, "dec1_pc %08x\n", spro->dec1_pc); // 16 bits
-	fprintf(cycle_trace_fp, "dec1_inst %08x\n", spro->dec1_inst); // 32 bits
-	fprintf(cycle_trace_fp, "dec1_opcode %08x\n", spro->dec1_opcode); // 5 bits
-	fprintf(cycle_trace_fp, "dec1_src0 %08x\n", spro->dec1_src0); // 3 bits
-	fprintf(cycle_trace_fp, "dec1_src1 %08x\n", spro->dec1_src1); // 3 bits
-	fprintf(cycle_trace_fp, "dec1_dst %08x\n", spro->dec1_dst); // 3 bits
-	fprintf(cycle_trace_fp, "dec1_immediate %08x\n", spro->dec1_immediate); // 32 bits
-	fprintf(cycle_trace_fp, "dec1_pred %08x\n", spro->dec1_pred);
+	fprintf(cycle_trace_fp, "        dec1_active %08x\n", spro->dec1_active);
+	fprintf(cycle_trace_fp, "        dec1_pc %08x\n", spro->dec1_pc); // 16 bits
+	fprintf(cycle_trace_fp, "        dec1_inst %08x\n", spro->dec1_inst); // 32 bits
+	fprintf(cycle_trace_fp, "        dec1_opcode %08x\n", spro->dec1_opcode); // 5 bits
+	fprintf(cycle_trace_fp, "        dec1_src0 %08x\n", spro->dec1_src0); // 3 bits
+	fprintf(cycle_trace_fp, "        dec1_src1 %08x\n", spro->dec1_src1); // 3 bits
+	fprintf(cycle_trace_fp, "        dec1_dst %08x\n", spro->dec1_dst); // 3 bits
+	fprintf(cycle_trace_fp, "        dec1_immediate %08x\n", spro->dec1_immediate); // 32 bits
+	fprintf(cycle_trace_fp, "        dec1_pred %08x\n", spro->dec1_pred);
 
-	fprintf(cycle_trace_fp, "exec0_active %08x\n", spro->exec0_active);
-	fprintf(cycle_trace_fp, "exec0_pc %08x\n", spro->exec0_pc); // 16 bits
-	fprintf(cycle_trace_fp, "exec0_inst %08x\n", spro->exec0_inst); // 32 bits
-	fprintf(cycle_trace_fp, "exec0_opcode %08x\n", spro->exec0_opcode); // 5 bits
-	fprintf(cycle_trace_fp, "exec0_src0 %08x\n", spro->exec0_src0); // 3 bits
-	fprintf(cycle_trace_fp, "exec0_src1 %08x\n", spro->exec0_src1); // 3 bits
-	fprintf(cycle_trace_fp, "exec0_dst %08x\n", spro->exec0_dst); // 3 bits
-	fprintf(cycle_trace_fp, "exec0_immediate %08x\n", spro->exec0_immediate); // 32 bits
-	fprintf(cycle_trace_fp, "exec0_alu0 %08x\n", spro->exec0_alu0); // 32 bits
-	fprintf(cycle_trace_fp, "exec0_alu1 %08x\n", spro->exec0_alu1); // 32 bits
-	fprintf(cycle_trace_fp, "exec0_pred %08x\n", spro->exec0_pred);
+	fprintf(cycle_trace_fp, "          exec0_active %08x\n", spro->exec0_active);
+	fprintf(cycle_trace_fp, "          exec0_pc %08x\n", spro->exec0_pc); // 16 bits
+	fprintf(cycle_trace_fp, "          exec0_inst %08x\n", spro->exec0_inst); // 32 bits
+	fprintf(cycle_trace_fp, "          exec0_opcode %08x\n", spro->exec0_opcode); // 5 bits
+	fprintf(cycle_trace_fp, "          exec0_src0 %08x\n", spro->exec0_src0); // 3 bits
+	fprintf(cycle_trace_fp, "          exec0_src1 %08x\n", spro->exec0_src1); // 3 bits
+	fprintf(cycle_trace_fp, "          exec0_dst %08x\n", spro->exec0_dst); // 3 bits
+	fprintf(cycle_trace_fp, "          exec0_immediate %08x\n", spro->exec0_immediate); // 32 bits
+	fprintf(cycle_trace_fp, "          exec0_alu0 %08x\n", spro->exec0_alu0); // 32 bits
+	fprintf(cycle_trace_fp, "          exec0_alu1 %08x\n", spro->exec0_alu1); // 32 bits
+	fprintf(cycle_trace_fp, "          exec0_pred %08x\n", spro->exec0_pred);
 
-	fprintf(cycle_trace_fp, "exec1_active %08x\n", spro->exec1_active);
-	fprintf(cycle_trace_fp, "exec1_pc %08x\n", spro->exec1_pc); // 16 bits
-	fprintf(cycle_trace_fp, "exec1_inst %08x\n", spro->exec1_inst); // 32 bits
-	fprintf(cycle_trace_fp, "exec1_opcode %08x\n", spro->exec1_opcode); // 5 bits
-	fprintf(cycle_trace_fp, "exec1_src0 %08x\n", spro->exec1_src0); // 3 bits
-	fprintf(cycle_trace_fp, "exec1_src1 %08x\n", spro->exec1_src1); // 3 bits
-	fprintf(cycle_trace_fp, "exec1_dst %08x\n", spro->exec1_dst); // 3 bits
-	fprintf(cycle_trace_fp, "exec1_immediate %08x\n", spro->exec1_immediate); // 32 bits
-	fprintf(cycle_trace_fp, "exec1_alu0 %08x\n", spro->exec1_alu0); // 32 bits
-	fprintf(cycle_trace_fp, "exec1_alu1 %08x\n", spro->exec1_alu1); // 32 bits
-	fprintf(cycle_trace_fp, "exec1_aluout %08x\n", spro->exec1_aluout);
+	fprintf(cycle_trace_fp, "            exec1_active %08x\n", spro->exec1_active);
+	fprintf(cycle_trace_fp, "            exec1_pc %08x\n", spro->exec1_pc); // 16 bits
+	fprintf(cycle_trace_fp, "            exec1_inst %08x\n", spro->exec1_inst); // 32 bits
+	fprintf(cycle_trace_fp, "            exec1_opcode %08x\n", spro->exec1_opcode); // 5 bits
+	fprintf(cycle_trace_fp, "            exec1_src0 %08x\n", spro->exec1_src0); // 3 bits
+	fprintf(cycle_trace_fp, "            exec1_src1 %08x\n", spro->exec1_src1); // 3 bits
+	fprintf(cycle_trace_fp, "            exec1_dst %08x\n", spro->exec1_dst); // 3 bits
+	fprintf(cycle_trace_fp, "            exec1_immediate %08x\n", spro->exec1_immediate); // 32 bits
+	fprintf(cycle_trace_fp, "            exec1_alu0 %08x\n", spro->exec1_alu0); // 32 bits
+	fprintf(cycle_trace_fp, "            exec1_alu1 %08x\n", spro->exec1_alu1); // 32 bits
+	fprintf(cycle_trace_fp, "            exec1_aluout %08x\n", spro->exec1_aluout);
 
 	fprintf(cycle_trace_fp, "stall %08x\n", spro->stall);
 
