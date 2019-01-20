@@ -121,6 +121,9 @@ static void sp_reset(sp_t *sp)
 #define JNE 19
 #define JIN 20
 #define HLT 24
+#define FLS 25
+#define DMA 30
+#define POL 31
 
 static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR", "LHI",
 				 "LD", "ST", "U", "U", "U", "U", "U", "U",
@@ -152,6 +155,24 @@ static int sp_reg_value(sp_registers_t *spro, int reg_num)
 		return spro->r[reg_num];
 
 	return 0;
+}
+
+
+static int sp_wb_op(int opcode) {
+	return opcode == ADD
+		|| opcode == SUB
+		|| opcode == LSF
+		|| opcode == RSF
+		|| opcode == AND
+		|| opcode == OR
+		|| opcode == XOR
+		|| opcode == LHI
+		|| opcode == LD
+		|| opcode == JLT
+		|| opcode == JLE
+		|| opcode == JEQ
+		|| opcode == JNE
+		|| opcode == JIN;
 }
 
 
@@ -193,36 +214,62 @@ static void sp_fetch1(sp_t *sp) {
 
 
 static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
-	int dec0_opcode_current = sbs(spro->dec0_inst, 29, 25);
-	int dec0_dst_current = sbs(spro->dec0_inst, 24, 22);
-	int dec0_immediate_current = sbs(spro->dec0_inst, 15, 0);
+	int dec0_opcode = sbs(spro->dec0_inst, 29, 25);
+	int dec0_dst = sbs(spro->dec0_inst, 24, 22);
+	int dec0_src0 = sbs(spro->dec0_inst, 21, 19);
+	int dec0_src1 = sbs(spro->dec0_inst, 18, 16);
+	int dec0_immediate = sbs(spro->dec0_inst, 15, 0);
 	
-	// check for stalls:
-	// Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
-	// Data Hazard - RAW
-	if (dec0_dst_current == spro->dec1_src0 || dec0_dst_current == spro->dec1_src1){
+	if (dec0_dst == spro->dec1_src0 || dec0_dst == spro->dec1_src1){
 		sprn->stall = 1;
 	}
-	if (dec0_dst_current == spro->dec0_src0 || dec0_dst_current == spro->dec0_src1){
+	if (dec0_dst == spro->dec0_src0 || dec0_dst == spro->dec0_src1){
 		sprn->stall = 2;
 	}
 
-	switch (dec0_opcode_current) {
-		case LD:
-			if (spro->dec1_opcode == ST) {
-				// Structural Hazard
-				sprn->stall = 2;
-			}
-			break;
+	switch (dec0_opcode) {
 		case JLT:
 		case JLE:
 		case JEQ:
 		case JNE:
 			// branch prediction
 			if (sp_get_pred(spro)) {
-				sprn->fetch0_pc = dec0_immediate_current;
+				sprn->fetch0_pc = dec0_immediate;
 				sprn->fetch1_active = 0;
 				sprn->dec0_active = 0;
+			}
+		case ADD:
+		case SUB:
+		case LSF:
+		case RSF:
+		case AND:
+		case OR:
+		case XOR:
+		case ST:
+			// check for stalls:
+			// Data Hazard - WAR &WAW are prevented since a stall stops F0 F1 D0 
+			// Data Hazard - RAW
+			if (sp_wb_op(spro->dec1_opcode) && (dec0_src0 == spro->dec1_dst || dec0_src1 == spro->dec1_dst)) {
+				sprn->stall = 2;
+			} else if (sp_wb_op(spro->exec0_opcode) && (dec0_src0 == spro->exec0_dst || dec0_src1 == spro->exec0_dst)) {
+				sprn->stall = 1;
+			}
+			break;
+		case LD:
+			if (sp_wb_op(spro->dec1_opcode) && dec0_src1 == spro->dec1_dst) {
+				sprn->stall = 2;
+			} else if (sp_wb_op(spro->exec0_opcode) && dec0_src1 == spro->exec0_dst) {
+				sprn->stall = 1;
+			} else if (spro->dec1_opcode == ST) {
+				// Structural Hazard
+				sprn->stall = 1;
+			}
+			break;
+		case JIN:
+			if (sp_wb_op(spro->dec1_opcode) && dec0_src0 == spro->dec1_dst) {
+				sprn->stall = 2;
+			} else if (sp_wb_op(spro->exec0_opcode) && dec0_src0 == spro->exec0_dst) {
+				sprn->stall = 1;
 			}
 			break;
 	}
@@ -230,10 +277,10 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 	sprn->dec1_pred = spro->dec0_pred;
 
 	sprn->dec1_inst = spro->dec0_inst;
-	sprn->dec1_opcode = dec0_opcode_current;
-	sprn->dec1_dst = dec0_dst_current;
-	sprn->dec1_src0 = sbs(spro->dec0_inst, 21, 19);
-	sprn->dec1_src1 = sbs(spro->dec0_inst, 18, 16);
+	sprn->dec1_opcode = dec0_opcode;
+	sprn->dec1_dst = dec0_dst;
+	sprn->dec1_src0 = dec0_src0;
+	sprn->dec1_src1 = dec0_src1;
 	sprn->dec1_immediate = ssbs(spro->dec0_inst, 15, 0);
 	sprn->dec1_pc = spro->dec0_pc;
 	sprn->dec1_active = 1;
@@ -241,12 +288,19 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 
 
 static void sp_dec1(sp_registers_t *spro, sp_registers_t *sprn) {
-	if (spro->opcode == LHI) {
+	if (spro->dec1_opcode == LHI) {
 		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_dst);
 		sprn->exec0_alu1 = spro->immediate;
 	} else {
 		sprn->exec0_alu0 = sp_reg_value(spro, spro->dec1_src0);
 		sprn->exec0_alu1 = sp_reg_value(spro, spro->dec1_src1);
+	}
+
+	if (spro->dec1_opcode == JIN) {
+		sprn->fetch0_pc = sp_reg_value(spro, spro->dec1_src0);
+		sprn->fetch1_active = 0;
+		sprn->dec0_active = 0;
+		sprn->dec1_active = 0;
 	}
 
 	sprn->exec0_pred = spro->dec1_pred;
@@ -321,11 +375,14 @@ static void sp_exec0(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 
 	if (spro->exec0_opcode == JLT || spro->exec0_opcode == JLE || spro->exec0_opcode == JEQ || spro->exec0_opcode == JNE) {
 		sprn->exec1_aluout = taken;
+		sp_set_pred(spro, sprn, taken);
 		if (spro->exec0_pred == 0 && taken == 1 || spro->exec0_pred == 1 && taken == 0) {
 			sprn->fetch1_active = 0;
 			sprn->dec0_active = 0;
 			sprn->dec1_active = 0;
+			sprn->dec1_opcode = FLS;
 			sprn->exec0_active = 0;
+			sprn->exec0_opcode = FLS;
 		}
 	}
 
@@ -366,17 +423,12 @@ static void sp_exec1(sp_registers_t *spro, sp_registers_t *sprn) {
 		case JLE:
 		case JEQ:
 		case JNE:
-			sp_set_pred(spro, sprn, spro->exec1_aluout);
 			if (spro->exec1_aluout) {
-				//TODO - flush if needed?
-				sprn->fetch0_pc = spro->exec1_immediate;
 				sprn->r[7] = spro->exec1_pc + 1;
 			}
 			break;
 
 		case JIN:
-		//TODO - flush if needed?
-			sprn->fetch0_pc = spro->exec1_alu0;
 			sprn->r[7] = spro->exec1_pc + 1;
 			break;
 	}
@@ -403,6 +455,7 @@ static void sp_ctl(sp_t *sp)
 	fprintf(cycle_trace_fp, "dec0_active %08x\n", spro->dec0_active);
 	fprintf(cycle_trace_fp, "dec0_pc %08x\n", spro->dec0_pc);
 	fprintf(cycle_trace_fp, "dec0_inst %08x\n", spro->dec0_inst); // 32 bits
+	fprintf(cycle_trace_fp, "dec0_pred %08x\n", spro->dec0_pred);
 
 	fprintf(cycle_trace_fp, "dec1_active %08x\n", spro->dec1_active);
 	fprintf(cycle_trace_fp, "dec1_pc %08x\n", spro->dec1_pc); // 16 bits
@@ -412,6 +465,7 @@ static void sp_ctl(sp_t *sp)
 	fprintf(cycle_trace_fp, "dec1_src1 %08x\n", spro->dec1_src1); // 3 bits
 	fprintf(cycle_trace_fp, "dec1_dst %08x\n", spro->dec1_dst); // 3 bits
 	fprintf(cycle_trace_fp, "dec1_immediate %08x\n", spro->dec1_immediate); // 32 bits
+	fprintf(cycle_trace_fp, "dec1_pred %08x\n", spro->dec1_pred);
 
 	fprintf(cycle_trace_fp, "exec0_active %08x\n", spro->exec0_active);
 	fprintf(cycle_trace_fp, "exec0_pc %08x\n", spro->exec0_pc); // 16 bits
@@ -423,6 +477,7 @@ static void sp_ctl(sp_t *sp)
 	fprintf(cycle_trace_fp, "exec0_immediate %08x\n", spro->exec0_immediate); // 32 bits
 	fprintf(cycle_trace_fp, "exec0_alu0 %08x\n", spro->exec0_alu0); // 32 bits
 	fprintf(cycle_trace_fp, "exec0_alu1 %08x\n", spro->exec0_alu1); // 32 bits
+	fprintf(cycle_trace_fp, "exec0_pred %08x\n", spro->exec0_pred);
 
 	fprintf(cycle_trace_fp, "exec1_active %08x\n", spro->exec1_active);
 	fprintf(cycle_trace_fp, "exec1_pc %08x\n", spro->exec1_pc); // 16 bits
@@ -454,7 +509,7 @@ static void sp_ctl(sp_t *sp)
 		sprn->fetch0_active = 1;
 
 	// stall handling
-	if(spro->stall)
+	if (spro->stall)
 		sprn->stall = spro->stall - 1;
 
 	// fetch0
@@ -477,7 +532,7 @@ static void sp_ctl(sp_t *sp)
 
 	// dec1
 	sprn->exec0_active = 0;
-	if (spro->dec1_active) {
+	if (spro->dec1_active && spro->stall == 0) {
 		sp_dec1(spro, sprn);
 	}
 
