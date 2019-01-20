@@ -165,7 +165,7 @@ static void sp_trace_inst(sp_registers_t *spro)
 
 	fprintf(
 		inst_trace_fp,
-		"--- instruction %d (%04x) @ PC %d (%04x) -----------------------------------------------------------\n\
+		"--- instruction %d (%04x) @ PC %d (%04d) -----------------------------------------------------------\n\
 pc = %04d, inst = %08x, opcode = %d (%s), dst = %d, src0 = %d, src1 = %d, immediate = %08x\n\
 r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x \n\
 r[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
@@ -574,12 +574,12 @@ static void sp_exec1(sp_t *sp, sp_registers_t *spro, sp_registers_t *sprn) {
 		case JEQ:
 		case JNE:
 			if (spro->exec1_aluout) {
-				sprn->r[7] = spro->exec1_pc + 1;
+				sprn->r[7] = spro->exec1_pc;
 			}
 			break;
 
 		case JIN:
-			sprn->r[7] = spro->exec1_pc + 1;
+			sprn->r[7] = spro->exec1_pc;
 			break;
 	}
 }
