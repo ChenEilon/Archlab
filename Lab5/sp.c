@@ -193,7 +193,7 @@ r[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
 	nr_simulated_instructions++;
 }
 
-static void sp_trace_exec(sp_registers_t *spro)
+static void sp_trace_exec(sp_t *sp, sp_registers_t *spro)
 {
 	switch (spro->exec1_opcode) {
 		case ADD:
@@ -694,7 +694,7 @@ static void sp_ctl(sp_t *sp)
 	// exec1
 	if (spro->exec1_active) {
 		sp_exec1(sp, spro, sprn);
-		sp_trace_inst(spro);
+		sp_trace_inst(sp, spro);
 		sp_trace_exec(spro);
 		if (spro->exec1_opcode == HLT) {
 			llsim_stop();
