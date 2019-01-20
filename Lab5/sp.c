@@ -214,13 +214,6 @@ static void sp_dec0(sp_registers_t *spro, sp_registers_t *sprn) {
 	int dec0_src0 = sbs(spro->dec0_inst, 21, 19);
 	int dec0_src1 = sbs(spro->dec0_inst, 18, 16);
 	int dec0_immediate = sbs(spro->dec0_inst, 15, 0);
-	
-	if (dec0_dst == spro->dec1_src0 || dec0_dst == spro->dec1_src1){
-		sprn->stall = 1;
-	}
-	if (dec0_dst == spro->dec0_src0 || dec0_dst == spro->dec0_src1){
-		sprn->stall = 2;
-	}
 
 	switch (dec0_opcode) {
 		case JLT:
